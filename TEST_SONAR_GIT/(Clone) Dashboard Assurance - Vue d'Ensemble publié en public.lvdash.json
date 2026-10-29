@@ -1,0 +1,574 @@
+{
+  "datasets": [
+    {
+      "name": "2f90f72d",
+      "displayName": "gold_fact_payment",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.default.gold_fact_payment",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "95a79966",
+      "displayName": "gold_fact_contrat",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.default.gold_fact_contrat",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "contract_count",
+            "expr": "COUNT(CONTRAT_ID)",
+            "displayName": "Nombre de Contrats"
+          },
+          {
+            "name": "prime_total",
+            "expr": "SUM(MONTANT_PRIME)",
+            "displayName": "Montant Total des Primes",
+            "format": {
+              "type": "currency",
+              "currencyCode": "EUR",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "2acff431",
+      "displayName": "gold_dim_client",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.default.gold_dim_client",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "client_count",
+            "expr": "COUNT(DISTINCT MASTER_CLIENT_ID)",
+            "displayName": "Nombre de Clients"
+          },
+          {
+            "name": "row_count",
+            "expr": "COUNT(*)",
+            "displayName": "Nombre de Lignes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "428c88ae",
+      "displayName": "gold_fact_sinistre",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.default.gold_fact_sinistre",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "c026a737",
+      "displayName": "client distribution and contract insight summary dataset",
+      "queryLines": [
+        "\r\n",
+        "\r\n",
+        "\r\n",
+        "--sql\r\n",
+        "\r\n",
+        "/*\r\n",
+        "# Création du Dashboard directement sous Databricks\r\n",
+        "# Pour réaliser les visualisations demandées : \r\n",
+        "\r\n",
+        "\r\n",
+        "#1.\tCréez une nouvelle cellule SQL dans votre notebook.\r\n",
+        "\r\n",
+        "#2.\tExécutez les 4 requêtes ci-dessous.\r\n",
+        "\r\n",
+        "#3.\tCliquez sur l'icône \"+\" à côté des résultats de la cellule -> Visualization, sélectionnez le type de graphique, puis cliquez sur Add to Dashboard. \r\n",
+        "\r\n",
+        "*/\r\n",
+        "\r\n",
+        "\r\n",
+        "-- 0. Nombre total de clients dans la base\r\n",
+        "SELECT COUNT(DISTINCT MASTER_CLIENT_ID) AS total_clients\r\n",
+        "FROM workspace.default.gold_dim_client;\r\n",
+        "\r\n",
+        "-- 1. Répartition des clients par code postal (Pie Chart)\r\n",
+        "SELECT CODE_POSTAL, COUNT(DISTINCT MASTER_CLIENT_ID) AS nb_clients\r\n",
+        "FROM workspace.default.gold_dim_client\r\n",
+        "GROUP BY CODE_POSTAL;\r\n",
+        "\r\n",
+        "-- 2. Statistiques des contrats par type (Bar Chart)\r\n",
+        "SELECT TYPE_CONTRAT, COUNT(CONTRAT_ID) AS nb_contrats, SUM(MONTANT_PRIME) AS montant_total\r\n",
+        "FROM workspace.default.gold_fact_contrat\r\n",
+        "GROUP BY TYPE_CONTRAT;\r\n",
+        "\r\n",
+        "-- 3. Statistiques sinistres et financières (KPIs)\r\n",
+        "SELECT \r\n",
+        "    SUM(c.MONTANT_PRIME) AS chiffre_affaires,\r\n",
+        "    SUM(s.MONTANT_INDEMNISE) AS indemnites_versees,\r\n",
+        "    ROUND((SUM(s.MONTANT_INDEMNISE) / SUM(c.MONTANT_PRIME)) * 100, 2) AS ratio_sinistralite_pct\r\n",
+        "FROM workspace.default.gold_fact_contrat c\r\n",
+        "LEFT JOIN workspace.default.gold_fact_sinistre s \r\n",
+        "    ON c.CONTRAT_ID = s.CONTRAT_ID;\r\n",
+        "\r\n",
+        "-- 4. Matrice des doublons (Table Filter)\r\n",
+        "SELECT MASTER_CLIENT_ID, NOM, PRENOM, COUNT(*) AS nb_comptes\r\n",
+        "FROM workspace.default.gold_dim_client\r\n",
+        "GROUP BY MASTER_CLIENT_ID, NOM, PRENOM\r\n",
+        "HAVING COUNT(*) > 1;\r\n",
+        "\r\n",
+        "--SQL\r\n",
+        "--0. Création de l'information total_clients\r\n",
+        "SELECT COUNT(DISTINCT MASTER_CLIENT_ID) as total_clients\r\n",
+        "FROM gold_dim_client;\r\n",
+        "\r\n",
+        "-- 1. Répartition des clients par Ville (Graphique Camembert / Pie Chart)\r\n",
+        "SELECT CODE_POSTAL, COUNT(DISTINCT MASTER_CLIENT_ID) as total_clients\r\n",
+        "FROM gold_dim_client\r\n",
+        "GROUP BY CODE_POSTAL;"
+      ],
+      "catalog": "workspace",
+      "schema": "default"
+    }
+  ],
+  "relationshipGraphs": [
+    {
+      "sources": [
+        {
+          "name": "gold_fact_payment",
+          "datasetName": "2f90f72d"
+        },
+        {
+          "name": "gold_fact_contrat",
+          "datasetName": "95a79966"
+        },
+        {
+          "name": "gold_dim_client",
+          "datasetName": "2acff431"
+        },
+        {
+          "name": "gold_fact_sinistre",
+          "datasetName": "428c88ae"
+        },
+        {
+          "name": "client_distribution_and_contract_insight_summary_dataset",
+          "datasetName": "c026a737"
+        }
+      ],
+      "relationships": [
+        {
+          "name": "relationship_0",
+          "from": "gold_fact_contrat",
+          "to": "gold_dim_client",
+          "on": "`gold_fact_contrat`.`MASTER_CLIENT_ID` = `gold_dim_client`.`MASTER_CLIENT_ID`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
+        },
+        {
+          "name": "relationship_1",
+          "from": "gold_fact_sinistre",
+          "to": "gold_fact_contrat",
+          "on": "`gold_fact_sinistre`.`CONTRAT_ID` = `gold_fact_contrat`.`CONTRAT_ID`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
+        }
+      ],
+      "measureExpressions": [
+        {
+          "name": "chiffre_affaires",
+          "expression": "MEASURE(`gold_fact_contrat`.`prime_total`)"
+        },
+        {
+          "name": "indemnites_versees",
+          "expression": "SUM(`gold_fact_sinistre`.`MONTANT_INDEMNISE`)"
+        },
+        {
+          "name": "ratio_sinistralite",
+          "expression": "SUM(`gold_fact_sinistre`.`MONTANT_INDEMNISE`) / MEASURE(`gold_fact_contrat`.`prime_total`) * 100"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "91c4650a",
+      "displayName": "Vue Principale",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_clients_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "measure(gold_dim_client__client_count)",
+                      "expression": "MEASURE(`gold_dim_client`.`client_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Nombre Total de Clients"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(gold_dim_client__client_count)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "chiffre_affaires",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "measure(chiffre_affaires)",
+                      "expression": "MEASURE(`chiffre_affaires`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Chiffre d'Affaires"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(chiffre_affaires)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "indemnites",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "measure(indemnites_versees)",
+                      "expression": "MEASURE(`indemnites_versees`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Indemnités Versées"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(indemnites_versees)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "ratio_sinistralite",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "measure(ratio_sinistralite)",
+                      "expression": "MEASURE(`ratio_sinistralite`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ratio de Sinistralité (%)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(ratio_sinistralite)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "doublons_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "gold_dim_client__MASTER_CLIENT_ID",
+                      "expression": "`gold_dim_client`.`MASTER_CLIENT_ID`"
+                    },
+                    {
+                      "name": "gold_dim_client__NOM",
+                      "expression": "`gold_dim_client`.`NOM`"
+                    },
+                    {
+                      "name": "gold_dim_client__PRENOM",
+                      "expression": "`gold_dim_client`.`PRENOM`"
+                    },
+                    {
+                      "name": "measure(gold_dim_client__row_count)",
+                      "expression": "MEASURE(`gold_dim_client`.`row_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {},
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "gold_dim_client__MASTER_CLIENT_ID"
+                  },
+                  {
+                    "fieldName": "gold_dim_client__NOM"
+                  },
+                  {
+                    "fieldName": "gold_dim_client__PRENOM"
+                  },
+                  {
+                    "fieldName": "measure(gold_dim_client__row_count)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "clients_by_code_postal_fixed",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "measure(gold_dim_client__client_count)",
+                      "expression": "MEASURE(`gold_dim_client`.`client_count`)"
+                    },
+                    {
+                      "name": "gold_dim_client__CODE_POSTAL",
+                      "expression": "`gold_dim_client`.`CODE_POSTAL`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Répartition des Clients par Code Postal"
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(gold_dim_client__client_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "gold_dim_client__CODE_POSTAL",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 5,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "contrats_by_type_fixed",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "fields": [
+                    {
+                      "name": "gold_fact_contrat__TYPE_CONTRAT",
+                      "expression": "`gold_fact_contrat`.`TYPE_CONTRAT`"
+                    },
+                    {
+                      "name": "measure(gold_fact_contrat__contract_count)",
+                      "expression": "MEASURE(`gold_fact_contrat`.`contract_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Statistiques des Contrats par Type"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "gold_fact_contrat__TYPE_CONTRAT",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(gold_fact_contrat__contract_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 12,
+            "width": 7,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
