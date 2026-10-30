@@ -1,11 +1,17 @@
+# Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # # test couverture
 Databricks notebook source
 # /// script
 # [tool.databricks.environment]
 # environment_version = "6"
 # ///
-# MAGIC %restart_python
+%restart_python
  
+
 # COMMAND ----------
 
 # MAGIC
@@ -25,6 +31,7 @@ Databricks notebook source
 # COMMAND ----------
 
 # DBTITLE 1,INGESTION CLEANING MATCHING MAPPING DOUBLONS
+# fonctionne enfin?
 #Test avec le nouveau yml pour les raison de sécutité
 #Troisième commit
 # ttttt
