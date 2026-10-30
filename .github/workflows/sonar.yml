@@ -15,12 +15,12 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # 👈 Version simplifiée v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5 # 👈 Version simplifiée v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -31,14 +31,14 @@ jobs:
           pytest --cov=. --cov-report=xml:coverage.xml || echo "Pas de tests exécutés ou erreur ignorée"
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4 # 👈 Version simplifiée v4
+        uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v3 # 👈 Version simplifiée officielle v3
+        uses: SonarSource/sonarcloud-github-action@v3 # 👈 Utilisation de l'action native SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
