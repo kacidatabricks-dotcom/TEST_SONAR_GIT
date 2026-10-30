@@ -1,5 +1,6 @@
 # Ajout des données pour avoir la trace
 
+
 from pyspark.sql import functions as F
 
 # 1. Définition des fonctions
@@ -29,7 +30,6 @@ def ajoutmétadonnées(df, source_system, source_file, client_id_col):
 # oracle_clients = spark.read...
 
 '''
-
 # ORACLE
 df_ab_clients =ajoutmétadonnées (df_ab_clients,"Oracle","Oracle_clients.csv","AB_CLIENT_ID")
 
