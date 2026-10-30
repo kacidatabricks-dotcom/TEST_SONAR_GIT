@@ -26,15 +26,10 @@ jobs:
 
       - name: Install Tools, Convert Notebooks & Run Tests
         run: |
-          # 1. Installation standard des outils sans restriction binaire
+          # Le paramètre --only-binary a été retiré ici pour autoriser l'installation de pyspark
           pip install jupytext==1.16.4 pytest pytest-cov pyspark
-          
-          # 2. Conversion des notebooks en scripts .py
           find . -name "*.ipynb" -exec jupytext --to py {} \;
-          
-          # 3. Exécution de pytest
           pytest --cov=. --cov-report=xml:coverage.xml || echo "Pas de tests exécutés ou erreur ignorée"
-
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -44,7 +39,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v3 # 👈 Utilisation de l'action native SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
