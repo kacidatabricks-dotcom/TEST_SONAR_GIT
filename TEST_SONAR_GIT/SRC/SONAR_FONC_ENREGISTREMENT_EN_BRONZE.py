@@ -1,5 +1,6 @@
 # Il faut enregsitrer les versions hachées
 
+# comment enregistrer directement les fichiers csv dans dbfs et non pas dans la table 
 
 #                                   ENREGISTREMENT EN BRONZE        
 # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta

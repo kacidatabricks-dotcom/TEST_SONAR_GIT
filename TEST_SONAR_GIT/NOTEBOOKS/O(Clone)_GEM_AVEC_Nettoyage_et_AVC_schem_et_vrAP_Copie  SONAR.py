@@ -264,16 +264,16 @@ def enregistrement_bronze(df,tablename):
  df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(tablename)
 '''
 # Tables Oracles
-enregistrement_bronze(df_ab_clients_bronze,"bronze.oracle_clients")
-enregistrement_bronze(df_ab_contrats_bronze,"bronze.oracle_contrats")
-enregistrement_bronze(df_ab_sinistres_bronze,"bronze.oracle_sinistres")
-enregistrement_bronze(df_ab_payments_bronze,"bronze.oracle_payments")
+enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
+enregistrement_bronze(df_ab_contrats_bronze,"workspace.bronze.oracle_contrats")
+enregistrement_bronze(df_ab_sinistres_bronze,"workspace.bronze.oracle_sinistres")
+enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
 
 # Tables SQL Server
-enregistrement_bronze(df_ap_clients_bronze,"bronze.sqlserver_clients")
-enregistrement_bronze(df_ap_contrats_bronze,"bronze.sqlserver_contrats")
-enregistrement_bronze(df_ap_payments_bronze,"bronze.sqlserver_payments")
-enregistrement_bronze(df_ap_sinistres_bronze,"bronze.sqlserver_sinistres")
+enregistrement_bronze(df_ap_clients_bronze,"workspace.bronze.sqlserver_clients")
+enregistrement_bronze(df_ap_contrats_bronze,"workspace.bronze.sqlserver_contrats")
+enregistrement_bronze(df_ap_payments_bronze,"workspace.bronze.sqlserver_payments")
+enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistres")
 
 
 
@@ -406,15 +406,15 @@ df_ap_payments_silver= df_ap_payments
 
 # Tables Oracle
 enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients")
-enregistrement_silver(df_ab_contrats_silver,"silver.oracle_contrats")
-enregistrement_silver(df_ab_sinistres_silver,"silver.oracle_sinistres")
-enregistrement_silver(df_ab_payments_silver,"silver.oracle_payments")
+enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats")
+enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres")
+enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments")
 
 # Tables SQL Server
-enregistrement_silver(df_ap_clients_silver,"silver.sqlserver_clients")
-enregistrement_silver(df_ap_contrats_silver,"silver.sqlserver_contrats")
-enregistrement_silver(df_ap_payments_silver,"silver.sqlserver_payments")
-enregistrement_silver(df_ap_sinistres_silver,"silver.sqlserver_sinistres")
+enregistrement_silver(df_ap_clients_silver,"workspace.silver.sqlserver_clients")
+enregistrement_silver(df_ap_contrats_silver,"workspace.silver.sqlserver_contrats")
+enregistrement_silver(df_ap_payments_silver,"workspace.silver.sqlserver_payments")
+enregistrement_silver(df_ap_sinistres_silver,"workspace.silver.sqlserver_sinistres")
 
 
 #####   ICI NORMALEMENT COMMENCE LA COUCHE GOLD ###################################
