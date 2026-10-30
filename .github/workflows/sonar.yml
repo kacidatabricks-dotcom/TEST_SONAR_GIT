@@ -1,10 +1,13 @@
+
 name: SonarCloud
 on:
   push:
     branches:
       - main
+      - Develop
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   sonar-scan:
