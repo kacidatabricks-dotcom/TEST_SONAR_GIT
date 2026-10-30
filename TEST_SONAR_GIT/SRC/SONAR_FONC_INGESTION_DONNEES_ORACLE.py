@@ -64,8 +64,6 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 spark = SparkSession.builder.appName("AssuranceData").getOrCreate()
 
 
-
-
 def create_ab_dataframes(spark):
     df_ab_clients= None
     df_ab_contrats = None
@@ -207,9 +205,6 @@ def create_ab_dataframes(spark):
         raise e
 
         
-
-
-
 
 
 # Ajout de sécurité du 30 0 9 2026
