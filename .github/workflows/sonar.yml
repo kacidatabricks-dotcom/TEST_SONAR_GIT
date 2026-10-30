@@ -1,3 +1,6 @@
+
+
+
 name: SonarCloud
 on:
   push:
@@ -13,12 +16,14 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        # Épinglé à la version v4.4.0
+        uses: actions/checkout@11d59601502504298d249b66e22bc6d6531d011d 
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        # Épinglé à la version v5.5.0
+        uses: actions/setup-python@8d9ed9ab9219b1bf4a92c30da9a4b087091ccb35 
         with:
           python-version: '3.10'
 
@@ -28,13 +33,16 @@ jobs:
           find . -name "*.ipynb" -exec jupytext --to py {} \;
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        # Épinglé à la version v4.2.0 (recommandée pour la sécurité)
+        uses: actions/cache@d4323d4df104b026a6e56904bb56e8d2e53b1b44 
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        # Épinglé à la version v5.3.1 (inclut le correctif de sécurité officiel)
+        uses: SonarSource/sonarqube-scan-action@4a572a1e0642878cf7d8ba154687e14fb1e68be5 
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
