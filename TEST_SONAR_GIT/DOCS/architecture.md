@@ -2,6 +2,7 @@
 
 ## Choix pour la Free Edition
 
+
 Le sujet demande Kafka, Talend, Hadoop et Spark. Pour une implémentation pédagogique 100 % Databricks :
 - PySpark couvre l'ETL et le traitement distribué ;
 - Delta Lake couvre le stockage analytique transactionnel ;
