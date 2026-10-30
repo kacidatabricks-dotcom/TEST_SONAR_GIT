@@ -793,9 +793,9 @@ import os
 from coverage import Coverage
 
 # Définir le chemin absolu du dossier SRC
-src_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR/TEST_SONAR_GIT/SRC"
+src_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/SRC"
 
-test_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR/TEST_SONAR_GIT/TESTS"
+test_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/TESTS"
 
 if src_path not in sys.path:
     sys.path.append(src_path)
@@ -823,18 +823,18 @@ for module_info in pkgutil.iter_modules([src_path]):
     module = importlib.import_module(module_info.name)
     module = importlib.reload(module)
     
-    # Injecte les FONCtions dans l'espace global pour que vos TESTs unittest les trouvent
+    # Injecte les fonctions dans l'espace global pour que vos tests unittest les trouvent
     module_attrs = [attr for attr in dir(module) if not attr.startswith('_')]
     for attr in module_attrs:
         globals()[attr] = getattr(module, attr)
-# Pour les SONAR_TESTs : les fichiers de SONAR_TESTS sont chargés via exec() (la couverture ne porte que sur SRC).
-# exec() fait partager le namespace du notebook, ce qui est indispensable ici car les SONAR_FONCtions
-# de SONAR_TEST s'appellent entre elles et utilisent les DataFrames créés par les fichiers d'ingestion.
+# Pour les tests : les fichiers de TESTS sont chargés via exec() (la couverture ne porte que sur SRC).
+# exec() fait partager le namespace du notebook, ce qui est indispensable ici car les fonctions
+# de test s'appellent entre elles et utilisent les DataFrames créés par les fichiers d'ingestion.
 import glob
 
-print("Chargement des fichiers de SONAR_TESTs (SONAR_TESTS)...")
-test_files = sorted(glob.glob(os.path.join(test_path, "test_*.py")))
-# Les fichiers d'ingestion en premier : ils créent df_ab_* utilisés par les autres SONAR_TESTs
+print("Chargement des fichiers de tests (TESTS)...")
+test_files = sorted(glob.glob(os.path.join(test_path, "SONAR_TEST_*.py")))
+# Les fichiers d'ingestion en premier : ils créent df_ab_* utilisés par les autres tests
 ingestion_files = [f for f in test_files if "INGESTION" in os.path.basename(f)]
 other_files = [f for f in test_files if f not in ingestion_files]
 
@@ -844,94 +844,94 @@ for f in ingestion_files + other_files:
     except Exception as e:
         print(f"ATTENTION : erreur au chargement de {os.path.basename(f)} : {e}")
 
-# Plusieurs SONAR_TESTs utilisent df_ab_* : on les crée via la SONAR_FONCtion SRC
-# (dans le fichier SONAR_TESTS d'ingestion Oracle, la création au niveau module est dans un docstring = code mort)
+# Plusieurs tests utilisent df_ab_* : on les crée via la fonction SRC
+# (dans le fichier TESTS d'ingestion Oracle, la création au niveau module est dans un docstring = code mort)
 df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
 # Idem pour les DataFrames AssurePlus (df_ap_*), utilisés notamment par harmonize_clients
 df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data()
 
-# Import des SONAR_FONCtions de SONAR_TESTs
+# Import des fonctions de tests
 import unittest
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
-# Charger vos fichiers de SONAR_TESTs (Ici vous pouvez garder exec() UNIQUEMENT pour les scripts de SONAR_TESTs,
-# car nous ne cherchons pas à mesurer la couverture des fichiers de SONAR_TESTs eux-mêmes, mais celle de SRC)
+# Charger vos fichiers de tests (Ici vous pouvez garder exec() UNIQUEMENT pour les scripts de tests,
+# car nous ne cherchons pas à mesurer la couverture des fichiers de tests eux-mêmes, mais celle de SRC)
 # je les commente
 #exec(open("/Workspace/Users/kacidatabricks@://gmail.com").read())
 #exec(open("/Workspace/Users/kacidatabricks@://gmail.com").read())
 
-# ... (Gardez vos autres lignes d'exécution de fichiers de SONAR_TESTS ici) ...
+# ... (Gardez vos autres lignes d'exécution de fichiers de TESTS ici) ...
 '''
-#SONAR_FONC
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_INGESTION_DONNEES_ORACLE.py").read())
+#FONC
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_INGESTION_DONNEES_ORACLE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_INGESTION_DES_DONNES_ASSUREPLUS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_INGESTION_DES_DONNES_ASSUREPLUS.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_GARDERLATRACE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_GARDERLATRACE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_ENREGISTREMENT_EN_BRONZE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_ENREGISTREMENT_EN_BRONZE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_ENREGISTREMENT_EN_SILVER.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_ENREGISTREMENT_EN_SILVER.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_NETTOYAGE_DES_DEUX_BASES.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_NETTOYAGE_DES_DEUX_BASES.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_HARMONISATION_ET_UNIFICATION_CLIENTS.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_MATRICE_DOUBLONS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_MATRICE_DOUBLONS.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_GOLD_CLIENT.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_GOLD_CLIENT.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_UNIFICATION_ET_GOLD_CONTRAT.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_UNIFICATION_ET_GOLD_SINISTRE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SRC/SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/SRC/FONC_UNIFICATION_ET_GOLD_PAYMENT.py").read())
 
 '''
 '''
-# SONAR_TEST
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_INGESTION_DONNEES_ORACLE.py").read())
+# TEST
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_INGESTION_DONNEES_ORACLE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_INGESTION_DES_DONNES_ASSUREPLUS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_INGESTION_DES_DONNES_ASSUREPLUS.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_GARDER_LA_TRACE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_GARDER_LA_TRACE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_ENREGISTREMENT_EN_BRONZE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_ENREGISTREMENT_EN_BRONZE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_ENREGISTREMENT_EN_SILVER.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_ENREGISTREMENT_EN_SILVER.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_NETTOYAGE_DES_DEUX_BASES.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_NETTOYAGE_DES_DEUX_BASES.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_HARMONISATION_ET_UNIFICATION_CLIENTS.py").read())
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_MATRICE_DOUBLONS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_HARMONISATION_ET_UNIFICATION_CLIENTS.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_MATRICE_DOUBLONS.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_GOLD_CLIENT.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_GOLD_CLIENT.py").read())
 
-# exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_UNIFICATION_ET_GOLD_CONTRAT.py").read())  # File not found - skipped
+# exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_UNIFICATION_ET_GOLD_CONTRAT.py").read())  # File not found - skipped
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_UNIFICATION_ET_GOLD_SINISTRE.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_UNIFICATION_ET_GOLD_SINISTRE.py").read())
 
-exec(open("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/SONAR_TESTS/SONAR_TEST_UNIFICATION_ET_GOLD_PAYMENT.py").read())
+exec(open("/Workspace/Users/kacidatabricks@gmail.com/PROJET_BIG_DATA_STUDI/TESTS/TEST_UNIFICATION_ET_GOLD_PAYMENT.py").read())
 
 '''
 
 
 # ==========================================
-# STEP 3 : EXÉCUTION DE la  CLASSE DE SONAR_TEST
+# STEP 3 : EXÉCUTION DE la  CLASSE DE TEST
 # ==========================================
 
-# SONAR_FONCtion clean_email utilisée par SONAR_TEST_clean_email
+# Fonction clean_email utilisée par test_clean_email
 def clean_email(value):
     if value is None:
         return None
     return value.strip().lower()
 
-# Alias : le SONAR_TEST appelle generer_matrice_doublons (en minuscules),
-# or la SONAR_FONCtion SRC s'appelle generer_Matrice_Doublons
+# Alias : le test appelle generer_matrice_doublons (en minuscules),
+# or la fonction SRC s'appelle generer_Matrice_Doublons
 generer_matrice_doublons = generer_Matrice_Doublons
 
-class testETLPipeline(unittest.TestCase):
+class TestETLPipeline(unittest.TestCase):
     def test_clean_email(self):
         self.assertEqual(clean_email("  JEAN.DUPONT@Email.FR "), "jean.dupont@email.fr")
         self.assertIsNone(clean_email(None))
@@ -942,15 +942,15 @@ class testETLPipeline(unittest.TestCase):
         value = df_clean.select("AB_NOM").collect()[0][0]
         self.assertEqual(value, "MARTIN")
     
-    # ... (Conservez le reste de vos méthodes de SONAR_TESTs inchangé) ...
+    # ... (Conservez le reste de vos méthodes de tests inchangé) ...
 
     '''
-    def SONAR_TEST_unified_clients(self):
+    def test_unified_clients(self):
         self.assertIsInstance(df_clients, DataFrame)
         self.assertTrue(df_clients.count() > 0)
     '''
     '''
-    def SONAR_TEST_clean_last_name(self):
+    def test_clean_last_name(self):
         df = df_ab_clients.withColumn("AB_NOM", F.lit("   martin "))
         df_clean = clean_last_name(df, "AB_NOM")
         value = df_clean.select("AB_NOM").collect()[0][0]
@@ -978,7 +978,8 @@ class testETLPipeline(unittest.TestCase):
         count_id = dim_clients.select("MASTER_CLIENT_ID").distinct().count()
         self.assertTrue(count_id > 0)
     
-    def test_gold_fact_contrat(self):   
+    def test_gold_fact_contrats(self):   
+       #test_unify_and_map_contrats()
         self.assertIsInstance(fact_contrats_gold, DataFrame)
         self.assertTrue(fact_contrats_gold.count() > 0)
 
@@ -996,7 +997,7 @@ class testETLPipeline(unittest.TestCase):
     def test1_create_ab_dataframes(self):
         test_create_ab_dataframes()
 
-    #SONAR_TEST_load_ap_data()
+    #test_load_ap_data()
     def test1_load_ap_data(self):
         load_ap_data()
 
@@ -1005,10 +1006,10 @@ class testETLPipeline(unittest.TestCase):
 
     def test1_ajoutmétadonnées(self):
         test_ajoutmétadonnées()
-# mettre ici le SONAR_TEST de nettoyage
+# mettre ici le test de nettoyage
     def test1_enregistrement_silver(self):
        test_enregistrement_silver()
-# SONAR_TEST_harmonize_clients()
+# test_harmonize_clients()
 
 
     def test1_generer_Matrice_Doublons(self):
@@ -1016,34 +1017,35 @@ class testETLPipeline(unittest.TestCase):
 
     def test1_save_dim_client_to_gold(self):
       test_save_dim_client_to_gold()
-# SONAR_TEST_SONAR_unify_and_map_contrats()  # SONAR_TEST file not found - skipped
+# test_unify_and_map_contrats()  # Test file not found - skipped
 
      
-    def test1_SONAR_unify_sinistres(self):
+    def test1_unify_sinistres(self):
       test_unify_sinistres()
 
-    def test1_SONAR_unify_payments(self):
+    def test1_unify_payments(self):
       test_unify_payments()
     
 
     def testt1_nettoyage_des_deux_bases(self):
-        # Le SONAR_TEST de nettoyage attend le schéma silver (NOM, PRENOM, EMAIL, ADRESSE, CODE_POSTAL, VILLE...)
+        # Le test de nettoyage attend le schéma silver (NOM, PRENOM, EMAIL, ADRESSE, CODE_POSTAL, VILLE...)
         # On reproduit l'ordre du pipeline : métadonnées -> unification -> nettoyage
         # (harmonize_clients a besoin des colonnes INGESTION_TIMESTAMP et SOURCE_FILE ajoutées par ajoutmétadonnées)
         df_ab_meta = ajoutmétadonnées(df_ab_clients, "Oracle", "oracle_clients.csv", "AB_CLIENT_ID")
         df_ap_meta = ajoutmétadonnées(df_ap_clients, "SQL Server", "assureplus_clients.csv", "AP_USER_ID")
         df_unified = harmonize_clients(df_ab_meta, df_ap_meta).withColumn("VILLE", F.lit("Paris"))
-        df = test_nettoyage_des_deux_bases(df_unified)
+        #df = test_nettoyage_des_deux_bases(df_unified)
+        df=data_cleaning(df_ab_meta,df_ap_meta)
 
 '''  ancienne 
-suite = unitSONAR_TEST.SONAR_TESTLoader().loadSONAR_TESTsFromSONAR_TESTCase(SONAR_TESTETLPipeline)
-runner = unitSONAR_TEST.TextSONAR_TESTRunner(verbosity=2)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestETLPipeline)
+runner = unittest.TextTestRunner(verbosity=2)
 runner.run(suite)
 
 # ancienne
 '''
 
-# SONAR_TESTLoader().loadSONAR_TESTsFromModule va automatiquement chercher les classes SONAR_TEST de votre environnement
+# TestLoader().loadTestsFromModule va automatiquement chercher les classes Test de votre environnement
 loader = unittest.TestLoader()
 suite = loader.loadTestsFromModule(sys.modules[__name__])
 
@@ -1066,11 +1068,12 @@ cov.report(ignore_errors=True)
 cov.stop()
 cov.save()
 
-print("\n--- RAPPORT DE COUVERTURE DES SONAR_TESTS ---")
+print("\n--- RAPPORT DE COUVERTURE DES TESTS ---")
 cov.report(ignore_errors=True)
 
 # ancienne
 '''
+
 
 # COMMAND ----------
 
