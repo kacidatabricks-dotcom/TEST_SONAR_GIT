@@ -26,10 +26,18 @@ jobs:
 
       - name: Install Tools, Convert Notebooks & Run Tests
         run: |
-          # Le paramètre --only-binary a été retiré ici pour autoriser l'installation de pyspark
-          pip install jupytext==1.16.4 pytest pytest-cov pyspark
+          # 1. Installation des outils de conversion, couverture et spark
+          pip install jupytext==1.16.4 coverage pyspark
+          
+          # 2. Conversion du notebook (.ipynb) en script Python (.py)
           find . -name "*.ipynb" -exec jupytext --to py {} \;
-          pytest --cov=. --cov-report=xml:coverage.xml || echo "Pas de tests exécutés ou erreur ignorée"
+          
+          # 3. Exécution de unittest enveloppé par coverage pour suivre l'exécution
+          # Découvre et exécute automatiquement les classes Test dans les fichiers convertis
+          coverage run -m unittest discover -s . -p "*.py" || echo "Pas de tests exécutés ou erreur ignorée"
+          
+          # 4. Génération du fichier XML pour SonarCloud
+          coverage xml -o coverage.xml
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
