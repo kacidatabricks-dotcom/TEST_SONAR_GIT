@@ -15,18 +15,21 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        # Épinglé sur la version officielle v4.2.2
+        uses: actions/checkout@11d59601502504298d249b66e22bc6d6531d011d 
         with:
           fetch-depth: 0
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        # Épinglé sur la version officielle v4.5.0
+        uses: actions/setup-java@8a44e8436356552299ec510d7595e672132711be
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        # Épinglé sur la version officielle v5.3.0
+        uses: actions/setup-python@0b93645e9fa290fc2ebd38ae5ff5e83428d9473e 
         with:
           python-version: '3.10'
 
@@ -37,14 +40,16 @@ jobs:
           pytest --continue-on-collection-errors --cov=. --cov-report=xml:coverage.xml || echo "Avertissement de découverte ignoré"
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        # Épinglé sur la version officielle v4.2.2
+        uses: actions/cache@1bd1e32a3bdc453d159583a534c442cf29e578c7 
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v3
+        # Épinglé sur la version officielle v3.1.0 (Règle githubactions:S7637 résolue)
+        uses: SonarSource/sonarcloud-github-action@e300976159556fa38b2585fbc70f5e1f0e4b09b4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
