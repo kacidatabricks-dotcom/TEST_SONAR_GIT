@@ -31,6 +31,16 @@ Databricks notebook source
 # COMMAND ----------
 
 # DBTITLE 1,INGESTION CLEANING MATCHING MAPPING DOUBLONS
+
+#Test 1318 31110
+# # test couverture du 31 10 2026
+# Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
+%restart_python
+# oooo
 # dernier essai
 # fonctionne enfin?
 #Test avec le nouveau yml pour les raison de sécutité
