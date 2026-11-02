@@ -1,60 +1,98 @@
 
 name: SonarCloud
+
 on:
   push:
     branches:
       - main
       - Develop
+
   pull_request:
     types: [opened, synchronize, reopened]
+
   workflow_dispatch:
 
 jobs:
   sonar-scan:
-    name: Build and analyze
+    name: Build, Test and Analyze
     runs-on: ubuntu-latest
-    
+
     steps:
+      # 1. Récupération du dépôt
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Java pour SonarCloud et Spark
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: zulu
+          java-version: "17"
 
+      # 3. Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: requirements-test.txt
 
-      - name: Install Tools, Convert Notebooks & Run Tests
+      # 4. Installation des dépendances
+      - name: Install Tools
         run: |
-          pip install jupytext==1.16.4 pytest pytest-cov pyspark
-          find . -name "*.ipynb" -exec jupytext --to py {} \;
-          pytest --continue-on-collection-errors --cov=. --cov-report=xml:coverage.xml || echo "Avertissement de découverte ignoré"
+          python -m pip install --upgrade pip
+          python -m pip install --only-binary=:all: -r requirements-test.txt
 
+      # 5. Configuration des chemins Python
+      - name: Configure Python paths
+        run: |
+          echo "PYTHONPATH=$GITHUB_WORKSPACE/SRC:$GITHUB_WORKSPACE/TESTS" >> $GITHUB_ENV
+
+      # 6. Conversion des notebooks Databricks
+      - name: Convert Notebooks
+        run: |
+          find NOTEBOOKS -name "*.ipynb" \
+            -not -path "*/.ipynb_checkpoints/*" \
+            -exec jupytext --to py {} \;
+
+      # 7. Vérification des fichiers Python
+      - name: Check Python files
+        run: |
+          echo "Fichiers SRC :"
+          find SRC -name "*.py"
+
+          echo "Fichiers TESTS :"
+          find TESTS -name "*.py"
+
+      # 8. Exécution des tests et génération du rapport
+      - name: Run Tests and Generate Coverage
+        run: |
+          pytest \
+            --continue-on-collection-errors \
+            --cov=SRC \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing
+
+      # 9. Vérification du rapport
+      - name: Check Coverage Report
+        run: |
+          test -f coverage.xml
+          ls -lh coverage.xml
+
+      # 10. Cache SonarCloud
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          restore-keys: |
+            ${{ runner.os }}-sonar
 
+      # 11. Analyse SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=kacidatabricks-dotcom_TEST_SONAR_GIT
-            -Dsonar.organization=kacidatabricks-dotcom
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            
-            -Dsonar.sources=.
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/test_*.py,**/*_test.py,**/*.py
