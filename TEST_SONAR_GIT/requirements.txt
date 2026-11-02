@@ -1,3 +1,22 @@
-pytest
-pytest-cov
-pandas
+#pytest
+#pytest-cov
+#pandas
+
+
+
+# ============================================================
+# DEPENDANCES POUR LES TESTS ET LA COUVERTURE
+# ============================================================
+
+# Conversion des notebooks Databricks
+jupytext==1.16.4
+
+# Framework de tests
+pytest==8.3.5
+
+# Couverture des tests
+pytest-cov==6.0.0
+coverage==7.6.12
+
+# Environnement PySpark local
+pyspark==3.5.3
