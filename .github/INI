@@ -1,0 +1,11 @@
+
+[pytest]
+
+python_files =
+    test_*.py
+    *_test.py
+    SONAR_TEST_*.py
+
+testpaths = TESTS
+
+addopts = -ra
