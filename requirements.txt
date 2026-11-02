@@ -9,7 +9,25 @@
 # ============================================================
 
 # Conversion des notebooks Databricks
-jupytext==1.16.4
+#jupytext==1.16.4
+
+# Framework de tests
+#pytest==8.3.5
+
+# Couverture des tests
+#pytest-cov==6.0.0
+#coverage==7.6.12
+
+# Environnement PySpark local
+#pyspark==3.5.3
+
+
+
+# nouveau 
+
+# ============================================================
+# DEPENDANCES PYTHON - SONARCLOUD / GITHUB ACTIONS
+# ============================================================
 
 # Framework de tests
 pytest==8.3.5
@@ -18,5 +36,13 @@ pytest==8.3.5
 pytest-cov==6.0.0
 coverage==7.6.12
 
+# Conversion des notebooks Databricks
+jupytext==1.16.4
+
 # Environnement PySpark local
 pyspark==3.5.3
+
+
+
+
+
