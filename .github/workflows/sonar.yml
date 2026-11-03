@@ -23,8 +23,8 @@ jobs:
         shell: bash
 
     env:
-      PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
-
+      #PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
+      PYTHONPATH: ${{ github.workspace }}/SRC:${{ github.workspace }}/TESTS
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
