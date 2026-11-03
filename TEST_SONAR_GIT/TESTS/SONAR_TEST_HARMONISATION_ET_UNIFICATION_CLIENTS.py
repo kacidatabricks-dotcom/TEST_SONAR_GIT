@@ -1,4 +1,4 @@
-from FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
+from SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
 # DBTITLE 1,
 """
 # Harmonisation des clients Oracle

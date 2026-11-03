@@ -31,19 +31,7 @@ Databricks notebook source
 # COMMAND ----------
 
 # DBTITLE 1,INGESTION CLEANING MATCHING MAPPING DOUBLONS
-# Test 02 11 20 54
-# test 0211 18 17
-# test 02 11 18 09 
-# test 02/11 18 04
-#  test du 02 11 2026
-#  test 14 02
-# test 13 41
-# test 13 34
-# Test du 13 28
-#  test du 13 25
-#Test 1318 31110
-# # test couverture du 31 10 2026
-# Databricks notebook source
+
 # /// script
 # [tool.databricks.environment]
 # environment_version = "6"
