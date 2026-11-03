@@ -1,4 +1,3 @@
-
 name: SonarCloud
 
 on:
@@ -6,10 +5,8 @@ on:
     branches:
       - main
       - Develop
-
   pull_request:
     types: [opened, synchronize, reopened]
-
   workflow_dispatch:
 
 permissions:
@@ -21,61 +18,61 @@ jobs:
     name: Tests and SonarCloud Analysis
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
+
     steps:
-      # 1. Récupération du dépôt GitHub
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. Installation de Java
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: "17"
+          java-version: '17'
 
-      # 3. Installation de Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
           cache: pip
           cache-dependency-path: requirements.txt
 
-      # 4. Installation des dépendances
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      # 5. Vérification de la structure du projet
-      - name: Check project structure
+      - name: Verify project structure
         run: |
-          echo "=== SRC ==="
-          ls -la TEST_SONAR_GIT/SRC
+          test -d TEST_SONAR_GIT/SRC
+          test -d TEST_SONAR_GIT/TESTS
+          test -f TEST_SONAR_GIT/TESTS/conftest.py
 
-          echo "=== TESTS ==="
-          ls -la TEST_SONAR_GIT/TESTS
-
-      # 6. Exécution des tests et génération du rapport
-      - name: Run Tests and Coverage
+      - name: Run PySpark tests and coverage
         run: |
           python -m pytest \
-            -o "python_files=SONAR_TEST_*.py test_*.py *_test.py" \
+            TEST_SONAR_GIT/TESTS \
             --continue-on-collection-errors \
             --cov=TEST_SONAR_GIT/SRC \
             --cov-report=xml:coverage.xml \
-            --cov-report=term-missing \
-            TEST_SONAR_GIT/TESTS
+            --cov-report=term-missing
 
-      # 7. Vérification du rapport de couverture
-      - name: Check Coverage Report
+      - name: Verify coverage report
+        if: always()
         run: |
-          test -f coverage.xml
-          echo "Coverage report generated successfully"
+          if [ -f coverage.xml ]; then
+            echo "Coverage XML generated."
+          else
+            echo "Coverage XML is missing."
+          fi
 
-      # 8. Cache SonarCloud
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
@@ -84,9 +81,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sonar
 
-      # 9. Analyse SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=kacidatabricks-dotcom_TEST_SONAR_GIT
+            -Dsonar.organization=kacidatabricks-dotcom
+            -Dsonar.python.coverage.reportPaths=coverage.xml
