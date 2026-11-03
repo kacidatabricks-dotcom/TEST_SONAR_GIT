@@ -49,11 +49,33 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Verify project structure
+     # - name: Verify project structure
+      #  run: |
+      #    test -d TEST_SONAR_GIT/SRC
+       #   test -d TEST_SONAR_GIT/TESTS
+       #   test -f TEST_SONAR_GIT/TESTS/conftest.py
+
+      - name: Debug project structure
         run: |
-          test -d TEST_SONAR_GIT/SRC
-          test -d TEST_SONAR_GIT/TESTS
-          test -f TEST_SONAR_GIT/TESTS/conftest.py
+          echo "=== Répertoire courant ==="
+          pwd
+
+          echo "=== Contenu de la racine GitHub ==="
+          ls -la
+
+          echo "=== Recherche du dossier SRC ==="
+          find . -type d -name SRC
+
+          echo "=== Recherche du dossier TESTS ==="
+          find . -type d -name TESTS
+
+          echo "=== Recherche du conftest.py ==="
+          find . -type f -name conftest.py
+
+
+
+
+          
 
       - name: Run PySpark tests and coverage
         run: |
