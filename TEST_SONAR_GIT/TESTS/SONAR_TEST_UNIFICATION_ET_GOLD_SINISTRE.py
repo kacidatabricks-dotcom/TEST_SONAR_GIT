@@ -34,6 +34,7 @@ def unify_sinistres(df_ab_sinistres, df_ap_sinistres, table_name="gold.fact_sini
     fact_sinistre_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name)
     return fact_sinistre_gold
 """
+from SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE import unify_and_map_sinistres
 def test_unify_sinistres():
     from pyspark.sql import Row
     test_ab = spark.createDataFrame([Row(AB_CLAIM_ID="1", AB_POLICY_NUMBER="A", AB_MONTANT_ESTIME=100, AB_STATUT_SINISTRE="Ouvert")])

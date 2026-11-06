@@ -1,4 +1,22 @@
 
+import pytest
+from pyspark.sql import SparkSession
+
+
+@pytest.fixture(scope="session")
+def spark():
+    session = (
+        SparkSession.builder
+        .master("local[2]")
+        .appName("pytest-sonar")
+        .getOrCreate()
+    )
+
+    yield session
+
+    session.stop()
+
+'''
 import os
 import sys
 import pytest
@@ -49,3 +67,5 @@ def inject_spark(request, spark):
     """
 
     request.module.spark = spark
+
+'''

@@ -1,5 +1,5 @@
 
-def test_unify_and_map_contrats():
+def test_unify_and_map_contrats(spark):
     # Création des DataFrames de test
     df_ab_contrats = spark.createDataFrame([
         ("P123", "CL001", "AUTO", "ACTIVE", 1000)
@@ -20,5 +20,5 @@ def test_unify_and_map_contrats():
     assert result.count() == 2, "Le DataFrame doit contenir deux contrats"
     result_ids = [row.CONTRAT_ID for row in result.collect()]
     assert "P123" in result_ids and "C456" in result_ids, "Les identifiants de contrats doivent être présents"
-
-test_unify_and_map_contrats()
+    
+#test_unify_and_map_contrats()  supprimé suite au conseil chatg

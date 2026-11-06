@@ -300,6 +300,7 @@ def create_ab_dataframes(spark):
     
     return df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments
 """
+from   SONAR_FONC_INGESTION_DONNEES_ORACLE  import create_ab_dataframes
 def test_create_ab_dataframes():
     dfs = create_ab_dataframes(spark)
     # Vérification des DataFrames créés

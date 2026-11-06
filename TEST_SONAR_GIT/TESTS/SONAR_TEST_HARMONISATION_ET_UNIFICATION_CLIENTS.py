@@ -78,7 +78,7 @@ def harmonize_clients(df_ab_clients, df_ap_clients):
     df_clients.createOrReplaceTempView("raw_unified_clients")
     return df_clients
 """
-def test_harmonize_clients():
+def test_harmonize_clients(spark):
     # Création de DataFrames de test avec deux lignes chacun
     from pyspark.sql.functions import lit
     ab_test_data = [
@@ -98,4 +98,4 @@ def test_harmonize_clients():
     return df_clients
 
 # Exécution du test
-test_harmonize_clients()
+#test_harmonize_clients()  supprimé suite à conseil chatg
