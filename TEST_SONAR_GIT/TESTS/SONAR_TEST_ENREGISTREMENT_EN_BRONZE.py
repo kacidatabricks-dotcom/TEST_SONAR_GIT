@@ -1,4 +1,4 @@
-from SONAR_FONC_ENREGISTREMENT_BRONZE import enregistrement_bronze
+from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
 """
 #                                   ENREGISTREMENT EN BRONZE        
 # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
