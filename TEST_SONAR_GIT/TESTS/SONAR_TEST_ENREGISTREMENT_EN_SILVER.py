@@ -1,4 +1,4 @@
-from SONAR_FONC_ENREGISTREMENT_SILVER import enregistrement_silver
+from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
 """
 #                                   ENREGISTREMENT EN SILVER        
 # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
