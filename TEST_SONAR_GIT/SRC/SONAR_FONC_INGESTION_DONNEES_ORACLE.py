@@ -61,7 +61,7 @@ from pyspark.sql.window import Window
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
 
 # Initialisation Spark
-spark = SparkSession.builder.appName("AssuranceData").getOrCreate()
+# spark = SparkSession.builder.appName("AssuranceData").getOrCreate()  supprimée parès le conseil de chat
 
 
 def create_ab_dataframes(spark):

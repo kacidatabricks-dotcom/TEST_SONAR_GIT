@@ -1,13 +1,11 @@
-
-import pytest
-import os
 import sys
 from pathlib import Path
 
+import pytest
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 
-
+# Chemin vers le dossier SRC
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "SRC"
 
@@ -33,6 +31,7 @@ def spark():
         )
     )
 
+    # Charge les bibliothèques Delta avant la création de Spark
     session = configure_spark_with_delta_pip(builder).getOrCreate()
 
     yield session

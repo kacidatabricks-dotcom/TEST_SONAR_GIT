@@ -12,7 +12,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 
 
 # Initialisation Spark
-spark = SparkSession.builder.appName("AssurePlusData").getOrCreate()
+# spark = SparkSession.builder.appName("AssurePlusData").getOrCreate()  supprimé parès conseil de chat
 
     
     # num fiscal et date creation n'existent pas 
