@@ -1,28 +1,10 @@
 
-import pytest
-from pyspark.sql import SparkSession
-
-
-@pytest.fixture(scope="session")
-def spark():
-    session = (
-        SparkSession.builder
-        .master("local[2]")
-        .appName("pytest-sonar")
-        .getOrCreate()
-    )
-
-    yield session
-
-    session.stop()
-
-'''
-import os
 import sys
-import pytest
-
 from pathlib import Path
+
+import pytest
 from pyspark.sql import SparkSession
+
 
 # =====================================================
 # CHEMINS DU PROJET
@@ -56,16 +38,10 @@ def spark():
 
 
 # =====================================================
-# MISE A DISPOSITION DE SPARK DANS LES TESTS
+# MISE A DISPOSITION DE SPARK
+# POUR LES ANCIENS TESTS
 # =====================================================
 
 @pytest.fixture(autouse=True)
 def inject_spark(request, spark):
-    """
-    Rend la session Spark accessible aux tests
-    qui utilisent directement la variable globale spark.
-    """
-
     request.module.spark = spark
-
-'''
