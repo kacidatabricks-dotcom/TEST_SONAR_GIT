@@ -41,7 +41,7 @@ def unify_payments(df_ab_payments, df_ap_payments, output_table="gold.fact_payme
     return fact_payment_gold
 """
 
-from SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENTS import unify_and_map_payments
+from SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT import unify_and_map_payments
 def test_unify_payments():
     # Création de dataframes de test
     ab_data = [

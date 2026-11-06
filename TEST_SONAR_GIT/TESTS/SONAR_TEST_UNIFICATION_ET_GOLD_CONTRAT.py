@@ -1,3 +1,4 @@
+from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
 
 def test_unify_and_map_contrats(spark):
     # Création des DataFrames de test

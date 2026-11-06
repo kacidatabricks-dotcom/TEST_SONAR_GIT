@@ -143,6 +143,7 @@ def normalize_phone_number(df, column_name):
 
 
 # Fonction de test de nettoyage utilisant les fonctions définies et le fichier SRC/Fonc_nettoyage_des_deux_bases
+'''
 def test_nettoyage_des_deux_bases(df_raw):
     """
     Teste le pipeline de nettoyage des données sur un DataFrame brut.
@@ -164,5 +165,30 @@ def test_nettoyage_des_deux_bases(df_raw):
 
 # Exemple d'utilisation :  INTERESSANT
 #test_nettoiage_des_deux_bases(df_clients)
+'''
+def test_nettoyage_des_deux_bases(spark):
 
+    from pyspark.sql import Row
+
+    df_raw = spark.createDataFrame([
+        Row(
+            NOM=" dupont ",
+            PRENOM="jean",
+            EMAIL="JEAN@EXEMPLE.COM",
+            ADRESSE=" 1 rue du test ",
+            CODE_POSTAL="75000",
+            DATE_NAISSANCE="1980-01-01",
+            DATE_CREATION="2020-01-01",
+            TELEPHONE="0612345678",
+            SOURCE_FILE="test.csv",
+            VILLE="Paris"
+        )
+    ])
+
+    result = test_nettoyage_des_deux_bases(df_raw)
+
+    assert result.count() == 1
+    assert result.first()["NOM"] == "DUPONT"
+    assert result.first()["PRENOM"] == "JEAN"
+    assert result.first()["EMAIL"] == "jean@exemple.com"
 

@@ -27,7 +27,7 @@ display(dim_client.join(doublons_df, "MASTER_CLIENT_ID"))
 
 
 
-def generer_Matrice_Doublons(df_clients):
+def generer_matrice_doublons(df_clients):
     from pyspark.sql.window import Window
     from pyspark.sql.functions import dense_rank, upper, initcap, concat_ws, col, count
     
