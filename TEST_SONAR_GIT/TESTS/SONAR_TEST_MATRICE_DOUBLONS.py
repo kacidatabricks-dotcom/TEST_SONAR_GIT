@@ -54,7 +54,7 @@ def test_generer_matrice_doublons():
         Row(NOM="Martin", PRENOM="Pierre", DATE_NAISSANCE="1990-02-02", ORIGINAL_ID=3)
     ]
     df_test = spark.createDataFrame(test_data)
-    df_result = generer_matrice_doublons(df_test)
+    matched_clients, dim_clients, doublons_df, df_result = generer_matrice_doublons(df_test)
     df_result.show(truncate=False)
     assert df_result.count() == 2, "La matrice de doublons devrait contenir 2 lignes"
     #assert df_result.filter(col("NB_OCCURENCES") == 2).count() == 1
