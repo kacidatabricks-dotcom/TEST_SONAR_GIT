@@ -167,10 +167,15 @@ def test_nettoyage_des_deux_bases(df_raw):
 # Exemple d'utilisation :  INTERESSANT
 #test_nettoiage_des_deux_bases(df_clients)
 '''
+from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_firstname, normalize_email, normalize_date, normalize_phone_number, data_cleaning
+
+from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
+from SONAR_FONC_INGESTION_DES_DONNEES_ASSURPLUS import load_ap_data
+
 def test_nettoyage_des_deux_bases(spark):
 
     from pyspark.sql import Row
-
+'''
     df_raw = spark.createDataFrame([
         Row(
             NOM=" dupont ",
@@ -185,11 +190,23 @@ def test_nettoyage_des_deux_bases(spark):
             VILLE="Paris"
         )
     ])
+'''
+   # result = test_nettoyage_des_deux_bases(spark)
+df1_test=create_ab_dataframes(spark)
+df2_test=load_ap_data(spark)
+df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
 
-    result = test_nettoyage_des_deux_bases(spark)
 
-    assert result.count() == 1
-    assert result.first()["NOM"] == "DUPONT"
-    assert result.first()["PRENOM"] == "JEAN"
-    assert result.first()["EMAIL"] == "jean@exemple.com"
+assert df1_test_cleaned.count() == 1
+assert df1_test_cleaned.first()["AB_NOM"] == "MARTIN"
+assert df1_test_cleaned.first()["AB_PRENOM"] == "JEAN"
+assert df1_test_cleaned.first()["AB_EMAIL"] == "jean.martin@gmail.fr"
+assert df1_test_cleaned.first()["AB_TELEPHONE"] == "+33612345678"
+
+
+assert df2_test_cleaned.count() == 1
+assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
+assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
+assert df2_test_cleaned.first()["AB_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
+assert df2_test_cleaned.first()["AB_PHONE_NUMBER"] == "+33612345678"
 

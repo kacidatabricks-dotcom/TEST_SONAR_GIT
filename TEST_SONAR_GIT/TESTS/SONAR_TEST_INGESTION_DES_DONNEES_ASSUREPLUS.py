@@ -19,7 +19,7 @@ ap_payments_schema = StructType([
 
 
 """
-from SONAR_FONC_INGESTION_ASSUREPLUS import load_ap_data
+from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
 def test_load_ap_data():
     df_clients, df_contrats, df_sinistres, df_payments = load_ap_data()
     assert df_clients.count() == 10
