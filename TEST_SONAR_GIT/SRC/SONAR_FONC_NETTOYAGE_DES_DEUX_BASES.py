@@ -111,28 +111,7 @@ df_ap_clients = clean_last_name(df_ap_clients,"AP_NOM")
 #display(df_ap_clients)
 
 """
-'''
-# Handle nulls
-def handle_nulls(df, column, default_value=None, strategy='fill'):
-    """
-    Gère les valeurs NULL.
-    strategies: 'fill' (remplacer), 'drop' (supprimer), 'flag' (marquer)
-    """
-    if strategy == 'fill':
-        return df.fillna({column: default_value})
-    elif strategy == 'drop':
-        return df.filter(col(column).isNotNull())
-    elif strategy == 'flag':
-        return df.withColumn(f"{column}_is_null", col(column).isNull())
 
-# Clean address
-def clean_address(df, address_column, postal_code_column, city_column):
-    """Nettoie et normalise les adresses"""
-    return (df
-        .withColumn({"address_column": trim(regexp_replace(col(address_column), r'\s+', ' ')),
-        "postal_code_column": regexp_replace(col(postal_code_column), r'\D', ''),
-        "city_column": upper(trim(col(city_column)))}))
-'''
 
 # Nettoyage des noms 
 #from pyspark.sql import functions as F
