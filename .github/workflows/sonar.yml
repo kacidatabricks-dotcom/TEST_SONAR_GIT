@@ -23,8 +23,8 @@ jobs:
         shell: bash
 
     env:
-      #PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
-      PYTHONPATH: ${{ github.workspace }}/SRC:${{ github.workspace }}/TESTS
+      PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
+      #PYTHONPATH: ${{ github.workspace }}/SRC:${{ github.workspace }}/TESTS
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,9 +74,6 @@ jobs:
 
 
 
-
-          
-
       - name: Run PySpark tests and coverage
         run: |
           python -m pytest \
@@ -86,14 +83,32 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
 
-      - name: Verify coverage report
-        if: always()
-        run: |
-          if [ -f coverage.xml ]; then
-            echo "Coverage XML generated."
-          else
-            echo "Coverage XML is missing."
-          fi
+
+- name: Verify coverage report
+  run: |
+    if [ ! -f coverage.xml ]; then
+      echo "ERREUR : coverage.xml absent"
+      exit 1
+    fi
+
+    echo "=== Taille du rapport ==="
+    ls -lh coverage.xml
+
+    echo "=== Début du rapport XML ==="
+    head -n 20 coverage.xml
+
+    echo "=== Sources déclarées ==="
+    grep -n "<source>" coverage.xml
+
+    echo "=== Fichiers déclarés ==="
+    grep -n "<class " coverage.xml | head -n 10
+
+
+
+
+    
+
+
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
