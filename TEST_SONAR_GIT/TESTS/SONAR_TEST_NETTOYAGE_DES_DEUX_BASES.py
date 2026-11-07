@@ -66,14 +66,14 @@ def test_nettoyage_des_deux_bases():
  df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
 
 
- assert df1_test_cleaned.count() == 1
+ assert df1_test_cleaned.count() == 10
  assert df1_test_cleaned.first()["AB_NOM"] == "MARTIN"
  assert df1_test_cleaned.first()["AB_PRENOM"] == "JEAN"
  assert df1_test_cleaned.first()["AB_EMAIL"] == "jean.martin@gmail.fr"
  assert df1_test_cleaned.first()["AB_TELEPHONE"] == "+33612345678"
 
 
- assert df2_test_cleaned.count() == 1
+ assert df2_test_cleaned.count() == 10
  assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
  assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
  assert df2_test_cleaned.first()["AP_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
