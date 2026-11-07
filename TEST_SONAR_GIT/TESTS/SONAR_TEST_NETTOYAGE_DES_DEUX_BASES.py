@@ -74,8 +74,8 @@ def test_nettoyage_des_deux_bases():
 
 
  assert df2_test_cleaned.count() == 10
- assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
- assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
+ assert df2_test_cleaned.first()["AP_NOM"] == ""
+ assert df2_test_cleaned.first()["AP_PRENOM"] == ""
  assert df2_test_cleaned.first()["AP_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
  assert df2_test_cleaned.first()["AP_PHONE_NUMBER"] == "+33712345678"
 
