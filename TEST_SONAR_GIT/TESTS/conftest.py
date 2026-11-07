@@ -33,6 +33,9 @@ def spark():
 
     # Charge les bibliothèques Delta avant la création de Spark
     session = configure_spark_with_delta_pip(builder).getOrCreate()
+    session.sql("CREATE DATABASE IF NOT EXISTS bronze")
+    session.sql("CREATE DATABASE IF NOT EXISTS silver")
+    session.sql("CREATE DATABASE IF NOT EXISTS gold")
 
     yield session
 

@@ -27,7 +27,7 @@ df_ap_clients =ajoutmétadonnées (df_ap_clients,"SQL","SQL_clients.csv","AP_USE
 display(df_ab_clients)
 display(df_ap_clients)
 """
-
+from SONAR_FONC_GARDER_LA_TRACE import ajoutmétadonnées
 def test_ajoutmétadonnées():
     test_data = [("123",), ("456",)]
     columns = ["AB_CLIENT_ID"]

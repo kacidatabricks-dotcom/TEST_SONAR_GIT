@@ -94,7 +94,7 @@ def test_harmonize_clients(spark):
     df_ab_clients = spark.createDataFrame(ab_test_data, ab_schema)
     df_ap_clients = spark.createDataFrame(ap_test_data, ap_schema)
     df_clients = harmonize_clients(df_ab_clients, df_ap_clients)
-    display(df_clients)
+    df_clients.show(truncate=False)
     return df_clients
 
 # Exécution du test

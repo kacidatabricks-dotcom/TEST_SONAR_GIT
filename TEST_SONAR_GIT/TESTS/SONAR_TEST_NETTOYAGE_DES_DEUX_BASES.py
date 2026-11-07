@@ -186,7 +186,7 @@ def test_nettoyage_des_deux_bases(spark):
         )
     ])
 
-    result = test_nettoyage_des_deux_bases(df_raw)
+    result = test_nettoyage_des_deux_bases(spark)
 
     assert result.count() == 1
     assert result.first()["NOM"] == "DUPONT"
