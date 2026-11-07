@@ -37,43 +37,45 @@ from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_first
 
 from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
 from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
+from pyspark.sql import Row
 
 def test_nettoyage_des_deux_bases():
 
-    from pyspark.sql import Row
-'''
-    df_raw = spark.createDataFrame([
-        Row(
-            NOM=" dupont ",
-            PRENOM="jean",
-            EMAIL="JEAN@EXEMPLE.COM",
-            ADRESSE=" 1 rue du test ",
-            CODE_POSTAL="75000",
-            DATE_NAISSANCE="1980-01-01",
-            DATE_CREATION="2020-01-01",
-            TELEPHONE="0612345678",
-            SOURCE_FILE="test.csv",
-            VILLE="Paris"
-        )
-    ])
+   
+#"""
+#df_raw = spark.createDataFrame([
+#       Row(
+#           NOM=" dupont ",
+#           PRENOM="jean",
+#          EMAIL="JEAN@EXEMPLE.COM",
+#           ADRESSE=" 1 rue du test ",
+#           CODE_POSTAL="75000",
+#           DATE_NAISSANCE="1980-01-01",
+#           DATE_CREATION="2020-01-01",
+#            TELEPHONE="0612345678",
+#            SOURCE_FILE="test.csv",
+#             VILLE="Paris"
+#       )
+#    ])
 
-   # result = test_nettoyage_des_deux_bases(spark)
-'''
-df1_test,df1_contrats, df1_sinistres, df1_paiements =create_ab_dataframes(spark)
-df2_test,df2_contrats, df2_sinistres, df2_paiements =load_ap_data(spark)
-df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
+# result = test_nettoyage_des_deux_bases(spark)
+#"""
 
-
-assert df1_test_cleaned.count() == 1
-assert df1_test_cleaned.first()["AB_NOM"] == "MARTIN"
-assert df1_test_cleaned.first()["AB_PRENOM"] == "JEAN"
-assert df1_test_cleaned.first()["AB_EMAIL"] == "jean.martin@gmail.fr"
-assert df1_test_cleaned.first()["AB_TELEPHONE"] == "+33612345678"
+ df1_test,df1_contrats, df1_sinistres, df1_paiements =create_ab_dataframes(spark)
+ df2_test,df2_contrats, df2_sinistres, df2_paiements =load_ap_data(spark)
+ df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
 
 
-assert df2_test_cleaned.count() == 1
-assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
-assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
-assert df2_test_cleaned.first()["AP_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
-assert df2_test_cleaned.first()["AP_PHONE_NUMBER"] == "+33712345678"
+ assert df1_test_cleaned.count() == 1
+ assert df1_test_cleaned.first()["AB_NOM"] == "MARTIN"
+ assert df1_test_cleaned.first()["AB_PRENOM"] == "JEAN"
+ assert df1_test_cleaned.first()["AB_EMAIL"] == "jean.martin@gmail.fr"
+ assert df1_test_cleaned.first()["AB_TELEPHONE"] == "+33612345678"
+
+
+ assert df2_test_cleaned.count() == 1
+ assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
+ assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
+ assert df2_test_cleaned.first()["AP_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
+ assert df2_test_cleaned.first()["AP_PHONE_NUMBER"] == "+33712345678"
 
