@@ -21,7 +21,7 @@ ap_payments_schema = StructType([
 """
 from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
 def test_load_ap_data(spark):
-    df_clients, df_contrats, df_sinistres, df_payments = load_ap_data()
+    df_clients, df_contrats, df_sinistres, df_payments = load_ap_data(spark)
     assert df_clients.count() == 10
     assert df_contrats.count() == 7
     assert df_sinistres.count() == 10

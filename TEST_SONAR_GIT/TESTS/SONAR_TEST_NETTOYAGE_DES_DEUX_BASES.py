@@ -156,7 +156,7 @@ from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_first
 from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
 from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
 
-def test_nettoyage_des_deux_bases(spark):
+def test_nettoyage_des_deux_bases():
 
     from pyspark.sql import Row
 '''
