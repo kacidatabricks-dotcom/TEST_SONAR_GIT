@@ -170,7 +170,7 @@ def test_nettoyage_des_deux_bases(df_raw):
 from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_firstname, normalize_email, normalize_date, normalize_phone_number, data_cleaning
 
 from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
-from SONAR_FONC_INGESTION_DES_DONNEES_ASSURPLUS import load_ap_data
+from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
 
 def test_nettoyage_des_deux_bases(spark):
 
