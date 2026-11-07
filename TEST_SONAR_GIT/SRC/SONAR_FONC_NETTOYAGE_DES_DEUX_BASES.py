@@ -224,7 +224,7 @@ def data_cleaning(df1, df2):
  df2 = normalize_phone_number(df2, "AP_PHONE_NUMBER")
 
  df1.show(truncate=False)
- df2.show(truncate=False
+ df2.show(truncate=False)
 
  return df1, df2
 
