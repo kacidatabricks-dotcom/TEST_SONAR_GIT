@@ -43,7 +43,7 @@ def unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, t
     "MODE_PAYMENT"
  )
 
- display(fact_payments_gold_mapped)
+ fact_payments_gold_mapped.show(truncate=False)
 
  fact_payments_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name + "_mapped")
 
