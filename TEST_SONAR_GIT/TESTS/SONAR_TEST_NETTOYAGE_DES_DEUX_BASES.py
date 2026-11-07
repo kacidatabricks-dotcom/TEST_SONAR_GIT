@@ -192,8 +192,8 @@ def test_nettoyage_des_deux_bases(spark):
     ])
 '''
    # result = test_nettoyage_des_deux_bases(spark)
-df1_test=create_ab_dataframes(spark)
-df2_test=load_ap_data(spark)
+df1_test,df1_contrats, df1_sinistres, df1_paiements =create_ab_dataframes(spark)
+df2_test,df2_contrats, df2_sinistres, df2_paiements =load_ap_data(spark)
 df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
 
 
