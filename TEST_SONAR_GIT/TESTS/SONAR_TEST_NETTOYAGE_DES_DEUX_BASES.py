@@ -27,7 +27,7 @@ VILLE     je ne l'ai pas rajouté
 
 
 """
-
+'''
 #   IL FAUT CREER  UNE FONCTION DE TEST DE NETTOYAGE
 
 
@@ -145,28 +145,12 @@ def normalize_phone_number(df, column_name):
 
 # Fonction de test de nettoyage utilisant les fonctions définies et le fichier SRC/Fonc_nettoyage_des_deux_bases
 '''
-def test_nettoyage_des_deux_bases(df_raw):
-    """
-    Teste le pipeline de nettoyage des données sur un DataFrame brut.
-    Applique toutes les fonctions de nettoyage définies.
-    """
-    df = df_raw
-    # Exemple d'application des étapes de nettoyage
-    df = handle_nulls(df, "EMAIL", default_value="inconnu@domain.com", strategy="fill")
-    df = clean_address(df, "ADRESSE", "CODE_POSTAL", "VILLE")
-    df = clean_last_name(df, "NOM")
-    df = df.withColumn("PRENOM", normalize_firstname("PRENOM"))
-    df = df.withColumn("EMAIL", normalize_email("EMAIL"))
-    df = normalize_date(df, "DATE_NAISSANCE")
-    df = normalize_date(df, "DATE_CREATION")
-    df = normalize_phone_number(df, "TELEPHONE")
-    df = df.withColumn("SOURCE_FILE", F.lit(source_file))
-    display(df)
-    return df
+''
+
 
 # Exemple d'utilisation :  INTERESSANT
 #test_nettoiage_des_deux_bases(df_clients)
-'''
+
 from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_firstname, normalize_email, normalize_date, normalize_phone_number, data_cleaning
 
 from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
@@ -190,8 +174,9 @@ def test_nettoyage_des_deux_bases(spark):
             VILLE="Paris"
         )
     ])
-'''
+
    # result = test_nettoyage_des_deux_bases(spark)
+'''
 df1_test,df1_contrats, df1_sinistres, df1_paiements =create_ab_dataframes(spark)
 df2_test,df2_contrats, df2_sinistres, df2_paiements =load_ap_data(spark)
 df1_test_cleaned, df2_test_cleaned = data_cleaning(df1_test,df2_test)
@@ -207,6 +192,6 @@ assert df1_test_cleaned.first()["AB_TELEPHONE"] == "+33612345678"
 assert df2_test_cleaned.count() == 1
 assert df2_test_cleaned.first()["AP_NOM"] == "MARTIN"
 assert df2_test_cleaned.first()["AP_PRENOM"] == "JEAN"
-assert df2_test_cleaned.first()["AB_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
-assert df2_test_cleaned.first()["AB_PHONE_NUMBER"] == "+33612345678"
+assert df2_test_cleaned.first()["AP_MAIL_ADDRESS"] == "jean.martin@gmail.fr"
+assert df2_test_cleaned.first()["AP_PHONE_NUMBER"] == "+33712345678"
 

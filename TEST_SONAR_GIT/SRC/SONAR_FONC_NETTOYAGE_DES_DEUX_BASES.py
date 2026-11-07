@@ -133,6 +133,7 @@ def clean_address(df, address_column, postal_code_column, city_column):
         "postal_code_column": regexp_replace(col(postal_code_column), r'\D', ''),
         "city_column": upper(trim(col(city_column)))}))
 '''
+
 # Nettoyage des noms 
 #from pyspark.sql import functions as F
 def clean_last_name(df,last_name_col):

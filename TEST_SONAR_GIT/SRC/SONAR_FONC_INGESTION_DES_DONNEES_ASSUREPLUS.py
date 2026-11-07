@@ -39,7 +39,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 
 
 
-def load_ap_data():
+def load_ap_data(spark):
     df_ap_clients= None
     df_ap_contrats = None
     df_ap_sinistres = None

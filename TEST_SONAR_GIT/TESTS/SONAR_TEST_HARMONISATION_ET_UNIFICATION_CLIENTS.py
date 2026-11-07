@@ -95,7 +95,16 @@ def test_harmonize_clients(spark):
     df_ap_clients = spark.createDataFrame(ap_test_data, ap_schema)
     df_clients = harmonize_clients(df_ab_clients, df_ap_clients)
     df_clients.show(truncate=False)
-    return df_clients
+    
+    # ecrire des assertions pour vérifier que les colonnes ont été renommées et que les valeurs ont été correctement transformées
+    assert df_clients.columns == ["SOURCE_SYSTEM", "ORIGINAL_ID", "NOM", "PRENOM", "DATE_NAISSANCE", "EMAIL", "TELEPHONE", "ADRESSE", "CODE_POSTAL", "NUMERO_FISCAL", "DATE_CREATION", "STATUT_CLIENT", "INGESTION_TIMESTAMP", "SOURCE_FILE"]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "1").select("NOM", "PRENOM", "DATE_NAISSANCE", "EMAIL", "TELEPHONE", "ADRESSE", "CODE_POSTAL", "NUMERO_FISCAL", "DATE_CREATION", "STATUT_CLIENT").collect() == [("DUPONT", "Jean", "1980-01-01", "jean.dupont@example.com", "0612345678", "1 rue du Test", "75000", "AB123", "2020-01-01", "Actif")]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "10").select("NOM", "PRENOM", "DATE_NAISSANCE", "EMAIL", "TELEPHONE", "ADRESSE", "CODE_POSTAL", "NUMERO_FISCAL", "DATE_CREATION", "STATUT_CLIENT").collect() == [("MARTIN", "Luc", "1975-05-05", "luc.martin@example.com", "0600001111", "10 place du Test", "31000", "AP789", "2019-12-12", "Actif")]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "2").select("NOM", "PRENOM", "DATE_NAISSANCE", "EMAIL", "TELEPHONE", "ADRESSE", "CODE_POSTAL", "NUMERO_FISCAL", "DATE_CREATION", "STATUT_CLIENT").collect() == [("Durand", "Marie", "1990-02-02", "marie.durand@example.com", "0698765432", "2 avenue du Test", "69000", "AB456", "2021-01-01", "Inactif")]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "20").select("NOM", "PRENOM", "DATE_NAISSANCE", "EMAIL", "TELEPHONE", "ADRESSE", "CODE_POSTAL", "NUMERO_FISCAL", "DATE_CREATION", "STATUT_CLIENT").collect() == [("BOURSE", "Julie", "1985-07-07", "julie.bourse@example.com", "0600002222", "20 impasse du Test", "33000", "AP012", "2018-11-11", "Inactif")]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "1").select("SOURCE_SYSTEM", "SOURCE_FILE").collect() == [("SQL", "file_ab.csv")]
+    assert df_clients.filter(df_clients.ORIGINAL_ID == "10").select("SOURCE_SYSTEM", "SOURCE_FILE").collect() == [("ORACLE", "file_ap.csv")]
+    
 
 # Exécution du test
 #test_harmonize_clients()  supprimé suite à conseil chatg
