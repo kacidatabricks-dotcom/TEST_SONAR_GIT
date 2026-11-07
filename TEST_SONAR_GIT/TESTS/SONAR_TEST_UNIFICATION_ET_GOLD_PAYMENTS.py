@@ -59,4 +59,4 @@ def test_unify_payments():
 
     fact_contrats_test = spark.createDataFrame([("PN1", 1), ("PN2", 2), ("PN3", 3)], ["CONTRAT_ID", "MASTER_CLIENT_ID"])
     result_df = unify_and_map_payments(df_ab_test, df_ap_test, fact_contrats_test, table_name="gold.test_gold_fact_payment")
-    display(result_df)
+    result_df.show(truncate=False)
