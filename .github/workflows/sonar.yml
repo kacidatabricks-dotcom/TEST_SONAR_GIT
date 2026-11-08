@@ -63,14 +63,16 @@ jobs:
           echo "=== Recherche du conftest.py ==="
           find . -type f -name conftest.py
 
+      
       - name: Run PySpark tests and coverage
         run: |
           python -m pytest \
             TEST_SONAR_GIT/TESTS \
             --continue-on-collection-errors \
-            --cov=TEST_SONAR_GIT/SRC \
+            --cov \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
+
 
       - name: Verify coverage report
         run: |
@@ -90,6 +92,7 @@ jobs:
 
           echo "=== Fichiers déclarés ==="
           grep -n "<class " coverage.xml | head -n 10
+          head -n 12 coverage.xml
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
