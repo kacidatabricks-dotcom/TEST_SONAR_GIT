@@ -1,3 +1,4 @@
+
 name: SonarCloud
 
 on:
@@ -24,7 +25,7 @@ jobs:
 
     env:
       PYTHONPATH: ${{ github.workspace }}/TEST_SONAR_GIT/SRC:${{ github.workspace }}/TEST_SONAR_GIT/TESTS
-      #PYTHONPATH: ${{ github.workspace }}/SRC:${{ github.workspace }}/TESTS
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,29 +50,18 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-     # - name: Verify project structure
-      #  run: |
-      #    test -d TEST_SONAR_GIT/SRC
-       #   test -d TEST_SONAR_GIT/TESTS
-       #   test -f TEST_SONAR_GIT/TESTS/conftest.py
-
       - name: Debug project structure
         run: |
           echo "=== Répertoire courant ==="
           pwd
-
           echo "=== Contenu de la racine GitHub ==="
           ls -la
-
           echo "=== Recherche du dossier SRC ==="
           find . -type d -name SRC
-
           echo "=== Recherche du dossier TESTS ==="
           find . -type d -name TESTS
-
           echo "=== Recherche du conftest.py ==="
           find . -type f -name conftest.py
-
 
       - name: Run PySpark tests and coverage
         run: |
@@ -81,26 +71,25 @@ jobs:
             --cov=TEST_SONAR_GIT/SRC \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
-          - name: Verify coverage report
-    run: |
-     if [ ! -f coverage.xml ]; then
-      echo "ERREUR : coverage.xml absent"
-      exit 1
-     fi
 
-     echo "=== Taille du rapport ==="
-     ls -lh coverage.xml
+      - name: Verify coverage report
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "ERREUR : coverage.xml absent"
+            exit 1
+          fi
 
-     echo "=== Début du rapport XML ==="
-     head -n 20 coverage.xml
+          echo "=== Taille du rapport ==="
+          ls -lh coverage.xml
 
-     echo "=== Sources déclarées ==="
-     grep -n "<source>" coverage.xml
+          echo "=== Début du rapport XML ==="
+          head -n 20 coverage.xml
 
-     echo "=== Fichiers déclarés ==="
-     grep -n "<class " coverage.xml | head -n 10
+          echo "=== Sources déclarées ==="
+          grep -n "<source>" coverage.xml
 
-
+          echo "=== Fichiers déclarés ==="
+          grep -n "<class " coverage.xml | head -n 10
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
