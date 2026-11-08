@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - Develop
+      - Test_push_databricks
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
