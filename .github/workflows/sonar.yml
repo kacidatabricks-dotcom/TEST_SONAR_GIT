@@ -50,6 +50,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+      - name: Check coverage configuration
+        run: |
+          echo "=== Fichier .coveragerc ==="
+          ls -la .coveragerc
+          cat .coveragerc
+
+          echo "=== Configuration coverage.py ==="
+          python -m coverage debug config
+
       - name: Debug project structure
         run: |
           echo "=== Répertoire courant ==="
