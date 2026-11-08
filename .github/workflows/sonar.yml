@@ -73,7 +73,6 @@ jobs:
           find . -type f -name conftest.py
 
 
-
       - name: Run PySpark tests and coverage
         run: |
           python -m pytest \
@@ -82,31 +81,24 @@ jobs:
             --cov=TEST_SONAR_GIT/SRC \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
-
-
-- name: Verify coverage report
-  run: |
-    if [ ! -f coverage.xml ]; then
+          - name: Verify coverage report
+    run: |
+     if [ ! -f coverage.xml ]; then
       echo "ERREUR : coverage.xml absent"
       exit 1
-    fi
+     fi
 
-    echo "=== Taille du rapport ==="
-    ls -lh coverage.xml
+     echo "=== Taille du rapport ==="
+     ls -lh coverage.xml
 
-    echo "=== Début du rapport XML ==="
-    head -n 20 coverage.xml
+     echo "=== Début du rapport XML ==="
+     head -n 20 coverage.xml
 
-    echo "=== Sources déclarées ==="
-    grep -n "<source>" coverage.xml
+     echo "=== Sources déclarées ==="
+     grep -n "<source>" coverage.xml
 
-    echo "=== Fichiers déclarés ==="
-    grep -n "<class " coverage.xml | head -n 10
-
-
-
-
-    
+     echo "=== Fichiers déclarés ==="
+     grep -n "<class " coverage.xml | head -n 10
 
 
 
