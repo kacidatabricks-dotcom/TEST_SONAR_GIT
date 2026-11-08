@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - Develop
+      - Test_push_databricks
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -50,6 +51,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+      - name: Check coverage configuration
+        run: |
+          echo "=== Fichier .coveragerc ==="
+          ls -la .coveragerc
+          cat .coveragerc
+
+          echo "=== Configuration coverage.py ==="
+          python -m coverage debug config
+
       - name: Debug project structure
         run: |
           echo "=== Répertoire courant ==="
@@ -63,14 +73,16 @@ jobs:
           echo "=== Recherche du conftest.py ==="
           find . -type f -name conftest.py
 
+      
       - name: Run PySpark tests and coverage
         run: |
           python -m pytest \
             TEST_SONAR_GIT/TESTS \
             --continue-on-collection-errors \
-            --cov=TEST_SONAR_GIT/SRC \
+            --cov \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
+
 
       - name: Verify coverage report
         run: |
@@ -90,6 +102,7 @@ jobs:
 
           echo "=== Fichiers déclarés ==="
           grep -n "<class " coverage.xml | head -n 10
+          head -n 12 coverage.xml
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
