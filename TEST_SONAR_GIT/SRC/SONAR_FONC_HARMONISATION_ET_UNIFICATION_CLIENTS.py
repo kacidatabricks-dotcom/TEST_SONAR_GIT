@@ -1,4 +1,4 @@
-from pyspark.sql.functions import col, lit, upper, trim, initcap, lower
+from pyspark.sql.functions import col, lit, upper, trim, initcap, lower, cast
 
 
 
@@ -6,12 +6,12 @@ def harmonize_clients(df_ab_clients, df_ap_clients):
     df_clients=None
     try:
         print ("unification des clients en cours...")
-        print(" Colonnes reçues dans le 1er paramètre (df_ab_clients) :", df_ab_clients.columns)
-        print("Colonnes reçues dans le 2e paramètre (df_ap_clients) :", df_ap_clients.columns)
+       # print(" Colonnes reçues dans le 1er paramètre (df_ab_clients) :", df_ab_clients.columns)
+       # print("Colonnes reçues dans le 2e paramètre (df_ap_clients) :", df_ap_clients.columns)
 
         std_df_ab_clients = df_ab_clients.select(
         lit("ORACLE").alias("SOURCE_SYSTEM"),
-        col("AB_CLIENT_ID").cast("string").alias("ORIGINAL_ID"),
+        col("AB_CLIENT_ID").alias("ORIGINAL_ID"),
         upper(trim(col("AB_NOM"))).alias("NOM"),
         initcap(trim(col("AB_PRENOM"))).alias("PRENOM"),
         col("AB_DATE_NAISSANCE").alias("DATE_NAISSANCE"),
@@ -27,7 +27,7 @@ def harmonize_clients(df_ab_clients, df_ap_clients):
     )
         std_df_ap_clients = df_ap_clients.select(
         lit("SQL").alias("SOURCE_SYSTEM"),
-        col("AP_USER_ID").cast("string").alias("ORIGINAL_ID"),
+        col("AP_USER_ID").alias("ORIGINAL_ID"),
         upper(trim(col("AP_NOM"))).alias("NOM"),
         initcap(trim(col("AP_PRENOM"))).alias("PRENOM"),
         col("AP_BIRTH_DATE").alias("DATE_NAISSANCE"),

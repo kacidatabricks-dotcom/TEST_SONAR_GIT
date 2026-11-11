@@ -3,14 +3,9 @@
 # [tool.databricks.environment]
 # environment_version = "6"
 # ///
-# # test couverture
-Databricks notebook source
-# /// script
-# [tool.databricks.environment]
-# environment_version = "6"
-# ///
-%restart_python
- 
+# MAGIC
+# MAGIC %restart_python
+# MAGIC  
 
 # COMMAND ----------
 
@@ -31,710 +26,457 @@ Databricks notebook source
 # COMMAND ----------
 
 # DBTITLE 1,INGESTION CLEANING MATCHING MAPPING DOUBLONS
-
-# test 0311 1908
-# /// script
-# [tool.databricks.environment]
-# environment_version = "6"
-# ///
-%restart_python
-# oooo
-# dernier essai
-# fonctionne enfin?
-#Test avec le nouveau yml pour les raison de sécutité
-#Troisième commit
-# ttttt
-# Deuxième commit
-# # Premier commit
-"""
-PARTIE 3 : IMPLEMENTATION TECHNIQUE SUR DATABRICKS (Sujet 3)
-Dossier 1 : Structure Git et Modèle de Données
-Question 1 : Repository Git
-	Branches : main (production), develop (intégration), feature/ingestion-oracle, feature/deduplication, bugfix/date-format.
-
-	Convention de nommage : <type>/<ticket-id>-<description-courte> (Ex: feature/AB-102-pipeline-sinistres).
-
-Question 2 : Modèle Conceptuel des Données (MCD Unifié)
-Le modèle réconcilie la structure d'AbAssurance (Oracle) et d'AssurePlus (SQL Server) : 
-
-
-+-------------------------------------------------+
-|                  DIM_CLIENTS                     |
-+-------------------------------------------------+
-| master_client_id (PK)                           |
-| source_system ('ORACLE' / 'SQL_SERVER')         |
-| original_id                                     |
-| nom, prenom, date_naissance, email, telephone   |
-| adresse, code_postal, ville, pays               |
-+-------------------------------------------------+
-                        │ 1
-                        │
-                        │ N
-+-------------------------------------------------+
-|                  FACT_CONTRATS                   |
-+-------------------------------------------------+
-| contrat_id (PK)                                 |
-| master_client_id (FK)                           |
-| type_contrat ('SANTE', 'AUTO', 'HABITATION'...) |
-| date_debut, date_fin, statut                    |
-| prime_annuelle_ttc                              |
-+-------------------------------------------------+
-                        │ 1
-                        │
-                        │ N
-+-------------------------------------------------+
-|                  FACT_SINISTRES                  |
-+-------------------------------------------------+
-| sinistre_id (PK)                                |
-| contrat_id (FK)                                 |
-| date_sinistre, date_declaration                 |
-| type_sinistre, statut ('OUVERT', 'CLOS'...)    |
-| montant_indemnise, cout_estime                  |
-+-------------------------------------------------+
-Dossier 2 & 3 : Implémentation complète sous Databricks (PySpark)
-"""
-# 2. Analysez le code d'une cellule ou d'un fichier script spécifique
-#%pip install pylint
-'''
-import pylint.lint
-# 1. On s'assure que le linter est installé
-%pip install pylint --quiet
-
-# 2. On utilise l'outil magique "!" pour forcer l'analyse système du fichier
-!pylint "O(Clone)_GEM_AVEC_Nettoyage_et_AVC_schem_et_vrAP_Copie.py" --max-line-length=150
-pylint_opts = ["--max-line-length=150", "O(Clone)_GEM_AVEC_Nettoyage_et_AVC_schem_et_vrAP_Copie.py"]
-pylint.lint.Run(pylint_opts)
-'''
-
-# POUR LE COVERAGE ########################
-%pip install coverage
-
-#   CONTRATs ET SIISTRES ET PAIEMENTS   et CLIENTS AUSSI    créer des tables silver 
-
-# Étape 1 : Simulation des jeux de données Oracle & SQL Server et enregistrementen bronze
-
-
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import initcap, col, lower, upper, trim, concat_ws, levenshtein, when, lit, count, sum as _sum, avg, round, to_date
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-import pandas as pd
-from datetime import datetime
-from pyspark.sql.window import Window
-
-
-from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
-from pyspark.sql import functions as F
-
-
-# Initialisation Spark
-# spark = SparkSession.builder.appName("AssuranceData").getOrCreate()   Apparemment non nécessaire
-
-
-# Importer des SONAR_FONCtions de SRC
-import sys
-import os
-
-# 1. Récupérer le chemin absolu du dossier courant (NOTEBOOK)
-current_dir = os.getcwd()
-
-# 2. CORRECTION : Remonter d'un niveau (dossier parent) avant d'aller dans SRC
-src_path = os.path.abspath(os.path.join(current_dir, "..", "SRC"))
-
-print("----SRC path -------------", src_path)
-
-# 3. L'ajouter au chemin système
-if src_path not in sys.path:
-    sys.path.append(src_path)
-
-print("SRRRRRRRRRRRRRRRRC")
-# Données oracle
-
-# 4. Importer la SONAR_FONCtion
-
-from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
-
-
-df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
-# Affichage des Dataframes
-print(df_ab_clients)
-print(df_ab_contrats)
-print(df_ab_sinistres)
-print(df_ab_payments)
-
-
-"""
-# Création des DataFrames
-
-df_ab_clients = spark.createDataFrame(ab_clients_data, schema=ab_clients_schema)
-"""
-
-# Protection des données
-def protection_bronze(df2, source):
-    
-
-    salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
-    
-    if source == "Oracle":
-    
-
-     df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AB_EMAIL"), F.lit(salt)), 256),
-
-     "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
-     "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
-     "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
-    else: 
-    
-     df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
-     "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
-     "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
-     "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
-     "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
-    return df2
-
-# Protection bronze
-
-df_ab_clients_bronze = protection_bronze(df_ab_clients,"Oracle")
-
-print("/n est ce que df_ab_clients est protégé à la sortie de la SONAR_FONCtion protection_bronze ", df_ab_clients)
-
-
-
-# Ajout de sécurité du 30 0 9 2026
-
-
-# Affichage des DataFrames pour voir s'il n'a pas été modifi" par la SONAR_FONCtion protection_bronze
-print("=== df_ab_clients ===")
-df_ab_clients.show(10, truncate=False)
-
-# ajout display de ab clinet protege de e mail le 30 0 9 2026
-print("=== df_ab_clients_protege ===")
-df_ab_clients_bronze.show(10, truncate=False)
-
-
-print("=== df_ab_contrats ===")
-df_ab_contrats.show(10, truncate=False)
-
-print("=== df_ab_sinistres ===")
-df_ab_sinistres.show(10, truncate=False)
-
-print("=== df_ab_payments ===")
-df_ab_payments.show(10, truncate=False)
-
-
-# Ingestion des données SQLServer
-
-# Données AssurPlus SQLserver
-
-# Import load_ap_data 
-from SONAR_FONC_INGESTION_DES_DONNES_ASSUREPLUS import load_ap_data
-
-# Obtention des dataframes
-df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data()
-
- # Scinder en nom et prénom le full name de Assurplus
-def split_full_name(df,col_last_name, col_first_name,col_full_name):
-
- df = df.withColumn(col_last_name, F.trim(F.split(F.col(col_full_name), " ").getItem(1))) \
-             .withColumn(col_first_name, F.trim(F.split(F.col(col_full_name), " ").getItem(0)))
- return df
- # Extraire le nom et prénom à partir du Full_name
-df_ap_clients = split_full_name(df_ap_clients,"AP_NOM","AP_PRENOM","AP_FULL_NAME")
-
-
-# Protection des données
-
-df_ap_clients_bronze = protection_bronze(df_ap_clients,"SQLServer")
-
-
-
-# Affichage df_pa_clients_bronze 
-print("=== ASSUREPLUS - Clients ===")
-df_ap_clients_bronze.show(10, truncate=False)
-
-print("=== ASSUREPLUS - Contrats ===")
-df_ap_contrats.show(10, truncate=False)
-
-print("=== ASSUREPLUS - Sinistres ===")
-df_ap_sinistres.show(10, truncate=False)
-
-print("=== ASSUREPLUS - Payments ===")
-df_ap_payments.show(10, truncate=False)
-
-
-# Enregistrement bronze
-from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
-
-df_ab_contrats_bronze = df_ab_contrats
-df_ab_sinistres_bronze = df_ab_sinistres
-df_ab_payments_bronze= df_ab_payments
-
-df_ap_contrats_bronze = df_ap_contrats
-df_ap_sinistres_bronze = df_ap_sinistres
-df_ap_payments_bronze= df_ap_payments
-
-#                                   ENREGISTREMENT EN BRONZE        
-# ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
-'''
-def enregistrement_bronze(df,tablename):
-
- df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(tablename)
-'''
-# Tables Oracles
-enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
-enregistrement_bronze(df_ab_contrats_bronze,"workspace.bronze.oracle_contrats")
-enregistrement_bronze(df_ab_sinistres_bronze,"workspace.bronze.oracle_sinistres")
-enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
-
-# Tables SQL Server
-enregistrement_bronze(df_ap_clients_bronze,"workspace.bronze.sqlserver_clients")
-enregistrement_bronze(df_ap_contrats_bronze,"workspace.bronze.sqlserver_contrats")
-enregistrement_bronze(df_ap_payments_bronze,"workspace.bronze.sqlserver_payments")
-enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistres")
-
-
-
-#   ICI Commence le silver ***************************************
-
-from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
-
-# Protection des données
-def protection_silver(df2, source):
-    
-
-    salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
-    
-    if source == "Oracle":
-    
-
-     df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AB_EMAIL"), F.lit(salt)), 256),
-
-     "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
-     "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
-     "Date_de_naissance": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
-     return df2
-    else: 
-    
-     df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
-     "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
-     "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
-     "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
-     "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
-     return df2
-
-
-# Ajout des données pour avoir la trace
-
-#from pyspark.sql import functions as F
-
-# 1. Définition des SONAR_FONCtions
-'''
-def ajoutmétadonnées(df, source_system, source_file, client_id_col):
-    return df \
-        .withColumn("SOURCE_SYSTEM", F.lit(source_system)) \
-        .withColumn("ORIGINAL_ID", F.col(client_id_col).cast("string")) \
-        .withColumn("SOURCE_FILE", F.lit(source_file)) \
-        .withColumn("INGESTION_TIMESTAMP", F.current_timestamp())
-
-'''
-
-# 2. Exécution de la chaîne (Exemple avec un DataFrame initialisé)
-# oracle_clients = spark.read...
-
-from SONAR_FONC_GARDER_LA_TRACE import ajoutmétadonnées
-
-
-# ORACLE
-df_ab_clients =ajoutmétadonnées (df_ab_clients,"Oracle","Oracle_clients.csv","AB_CLIENT_ID")
-
-#SQL Server
-df_ap_clients =ajoutmétadonnées (df_ap_clients,"SQL","SQL_clients.csv","AP_USER_ID")
-
-
-display(df_ab_clients)
-display(df_ap_clients)
-
-
-
-
-
-
-# Étape 2 : Data Pipeline - Harmonisation & Unification (Silver Layer)
-
-"""
-
-Schéma client final :
-
-MASTER_CLIENT_ID
-SOURCE_SYSTEM
-SOURCE_CLIENT_ID
-NOM
-PRENOM
-NOM_COMPLET
-DATE_NAISSANCE
-EMAIL
-TELEPHONE
-ADRESSE
-CODE_POSTAL
-NUMERO_FISCAL
-DATE_CREATION
-STATUT_CLIENT
-SCORE_FIDELITE
-DATE_INTEGRATION
-SOURCE_FILE
-INGESTION_TIMESTAMP
-VILLE     je ne l'ai pas rajouté
-
-
-"""
-
-
-
-from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import data_cleaning
-
-
-
-df_ab_clients, df_ap_clients= data_cleaning(df_ab_clients,df_ap_clients)
-
-######   ENREGISTREMENT SILVER #############################
-#print("Colonnes AB :", df_ab_clients.columns)
-#print("Colonnes AP :", df_ap_clients.columns)
-  
-from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
-
-
-#                                   ENREGISTREMENT EN SILVER        
-# ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données 
-
-
-
-df_ab_clients_silver = protection_silver(df_ab_clients,"Oracle")
- # à faire drop 
-df_ab_contrats_silver = df_ab_contrats
-df_ab_sinistres_silver = df_ab_sinistres
-df_ab_payments_silver= df_ab_payments
-
-df_ap_clients_silver = protection_silver(df_ap_clients,"SQLServer")
-# à faire drop 
-df_ap_contrats_silver = df_ap_contrats
-df_ap_sinistres_silver = df_ap_sinistres
-df_ap_payments_silver= df_ap_payments
-
-
-# Tables Oracle
-enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients")
-enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats")
-enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres")
-enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments")
-
-# Tables SQL Server
-enregistrement_silver(df_ap_clients_silver,"workspace.silver.sqlserver_clients")
-enregistrement_silver(df_ap_contrats_silver,"workspace.silver.sqlserver_contrats")
-enregistrement_silver(df_ap_payments_silver,"workspace.silver.sqlserver_payments")
-enregistrement_silver(df_ap_sinistres_silver,"workspace.silver.sqlserver_sinistres")
-
-
-#####   ICI NORMALEMENT COMMENCE LA COUCHE GOLD ###################################
-
-
-
-from SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
-
-
-
-dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
-print("dim_clients")
-display(dim_clients)
-
-
-# Étape 3 : Matrice de Doublons et Création de la Dimension Client
-
-from SONAR_FONC_MATRICE_DOUBLONS import generer_Matrice_Doublons
-
-# Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance ou Téléphone)
-from pyspark.sql.window import Window
-from pyspark.sql.functions import dense_rank, upper, initcap
-'''
-matched_clients,dim_clients,doublons_df,result_df = generer_Matrice_Doublons(dim_clients)
-
-print("Matrice des doublons")
-
-display(dim_clients.join(doublons_df, "MASTER_CLIENT_ID"))
-'''
-
-# Hypothèse : df_clients_initial est votre DataFrame propre d'origine
-# Si vous n'avez que dim_clients, assurez-vous de réexécuter la cellule du dessus qui le génère initialement.
-
-# res_matched, res_dim, res_doublons, res_df = generer_Matrice_Doublons(dim_clients)     ceci marche 
-matched_clients, dim_clients, doublons_df,result_df =generer_Matrice_Doublons(dim_clients)
-
-print("Matrice des doublons")
-display(dim_clients.join(doublons_df, "MASTER_CLIENT_ID"))
-
-
-
-
-
-
-# Protection GOLD
-
-def protection_gold(df):
-    
-    salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
-    
-    df = df.withColumns({"Email_Hached": F.sha2(F.concat(F.col("EMAIL"), F.lit(salt)), 256),
-
-    "Nom_Hached": F.sha2(F.concat(F.col("NOM"), F.lit(salt)), 256),
-    "Prenom_Hached": F.sha2(F.concat(F.col("PRENOM"), F.lit(salt)), 256),
-    "Date_de_naissance_Hached": F.sha2(F.concat(F.col("DATE_NAISSANCE"), F.lit(salt)), 256),
-    "Numero_fiscal_Hached": F.sha2(F.concat(F.col("NUMERO_FISCAL"), F.lit(salt)), 256),
-    "Adresse_Hached": F.sha2(F.concat(F.col("ADRESSE"), F.lit(salt)), 256),
-    "TELEPHONE_Hached": F.sha2(F.concat(F.col("TELEPHONE"), F.lit(salt)), 256)}).drop("NOM", "PRENOM","EMAIL","DATE_NAISSANCE", "NUMERO_FISCAL", "ADRESSE", "TELEPHONE")
-
-    return df
-
-print(" ------Matrice des doublons après chiffrement---------------")
-
-dim_clients_protege= protection_gold(dim_clients)
-#dim_clients_gold = dim_clients_protege.drop("NOM","DATE_NAISSANCE","PRENOM")
-dim_clients_gold = dim_clients_protege
-display(dim_clients_gold.join(doublons_df, "MASTER_CLIENT_ID"))
-
-# Enregistrment GOLD Client
-
-
-dim_clients_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.dim_clients_gold")
-
-
-# Étape 4 : Tables de Faits Contrats et Sinistres et payments (Gold Layer)
-
-from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
-
-# Unification Contrats
-
-fact_contrats_gold = unify_and_map_contrats(df_ab_contrats, df_ap_contrats, dim_clients)
-
-'''
-facts_contrats = df_ab_contrats.select(
-    col("AB_POLICY_NUMBER").cast("string").alias("CONTRAT_ID"),
-    lit("ORACLE").alias("SOURCE_SYSTEM"),
-    col("AB_CLIENT_ID").cast("string").alias("ORIGINAL_CLIENT_ID"),
-    col("AB_TYPE_ASSURANCE").alias("TYPE_CONTRAT"),
-    col("AB_STATUT_CONTRAT").alias("STATUT_CONTRAT"),
-    col("AB_PRIME_ANNUELLE").alias("MONTANT_PRIME")
-).union(
-    df_ap_contrats.select(
-        col("AP_CONTRACT_REF").cast("string").alias("CONTRAT_ID"),
-        lit("SQL").alias("SOURCE_SYSTEM"),
-        col("AP_USER_ID").cast("string").alias("ORIGINAL_CLIENT_ID"),
-        col("AP_PRODUCT_CODE").alias("TYPE_CONTRAT"),
-        col("AP_CONTRACT_STATE").alias("STATUT_CONTRAT"),
-        col("AP_MONTHLY_PREMIUM").alias("MONTANT_PRIME")
-    )
-)
-print("#------ Affichage des contrats --------")
-
-display(facts_contrats)
-
-# Mapping avec Master_Client_ID
-fact_contrat_gold = facts_contrats.join(
-    dim_clients,
-    (facts_contrats.ORIGINAL_CLIENT_ID == dim_clients.ORIGINAL_ID) & 
-    (facts_contrats.SOURCE_SYSTEM == dim_clients.SOURCE_SYSTEM)
-).select("CONTRAT_ID", "MASTER_CLIENT_ID", "TYPE_CONTRAT", "MONTANT_PRIME", "STATUT_CONTRAT")
-
-print("#------ Affichage des contrats  après mapping --------")
-'''
-display(fact_contrats_gold)
-# faire une protection gold 
-
-fact_contrats_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_contrats")
-
-'''
-# Unification Sinistres
-fact_sinistres_gold = df_ab_sinistres.select(
-    col("AB_CLAIM_ID").cast("string").alias("SINISTRE_ID"),
-    col("AB_POLICY_NUMBER").cast("string").alias("CONTRAT_ID"),
-    col("AB_MONTANT_ESTIME").alias("MONTANT_INDEMNISE"),
-     col("AB_STATUT_SINISTRE").alias("STATUT_SINISTRE")
-).union(
-    df_ap_sinistres.select(
-        col("AP_SINISTRE_NUM").cast("string").alias("SINISTRE_ID"),
-        col("AP_CONTRACT_REF").alias("CONTRAT_ID"),
-        col("AP_ESTIMATED_AMOUNT").alias("MONTANT_INDEMNISE"),
-        col("AP_CLAIM_STATUS").alias("STATUT_SINISTRE")
-
-    )
-)
-
-fact_sinistres_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_sinistres")
-'''
-
-
-# Unification Sinistres
-
-from  SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE   import unify_and_map_sinistres
-
-fact_sinistres_gold = unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold, table_name="gold.fact_sinistres")
-
-''' ici l ancienne version qui marche 
-fact_sinistres_gold = df_ab_sinistres.select(
-    col("AB_CLAIM_ID").cast("string").alias("SINISTRE_ID"),
-    col("AB_POLICY_NUMBER").cast("string").alias("CONTRAT_ID"),
-    col("AB_MONTANT_ESTIME").alias("MONTANT_INDEMNISE"),
-     col("AB_STATUT_SINISTRE").alias("STATUT_SINISTRE")
-).union(
-    df_ap_sinistres.select(
-        col("AP_SINISTRE_NUM").cast("string").alias("SINISTRE_ID"),
-        col("AP_CONTRACT_REF").alias("CONTRAT_ID"),
-        col("AP_ESTIMATED_AMOUNT").alias("MONTANT_INDEMNISE"),
-        col("AP_CLAIM_STATUS").alias("STATUT_SINISTRE")
-
-    )
-)
-
-fact_sinistres_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_sinistres")
-# Mapping des sinistres avec la dim_clients pour obtenir MASTER_CLIENT_ID
-
-fact_sinistres_gold_mapped = fact_sinistres_gold.join(
-    fact_contrats_gold.select("CONTRAT_ID", "MASTER_CLIENT_ID"),
-    "CONTRAT_ID",
-    how="left"
-).select(
-    "SINISTRE_ID",
-    "CONTRAT_ID",
-    "MASTER_CLIENT_ID",
-    "MONTANT_INDEMNISE",
-    "STATUT_SINISTRE"
-)
-
-display(fact_sinistres_gold_mapped)
-
-fact_sinistres_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_sinistres_mapped")
-
-
-'''
-
-# Unification payments
-
-from  SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT   import unify_and_map_payments
-
-fact_payments_gold_mapped = unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, table_name="gold.fact_payments")
-'''
-
-fact_payments_gold = df_ab_payments.select(
-    col("AB_PAYMENT_ID").cast("string").alias("PAYMENT_ID"),
-    col("AB_POLICY_NUMBER").cast("string").alias("CONTRAT_ID"),
-    col("AB_DATE_PAYMENT").alias("DATE_PAYMENT"),
-    col("AB_MONTANT").alias("MONTANT_INDEMNISE"),
-    col("AB_MODE_PAYMENT").alias("MODE_PAYMENT")
-).union(
-    df_ap_payments.select(
-    col("AP_PAYMENT_REF").cast("string").alias("PAYMENT_ID"),
-    col("AP_CONTRACT_REF").cast("string").alias("CONTRAT_ID"),
-    col("AP_PAYMENT_DATETIME").alias("DATE_PAYMENT"),
-    col("AP_AMOUNT_PAID").alias("MONTANT_INDEMNISE"),
-    col("AP_PAYMENT_CHANNEL").alias("MODE_PAYMENT")
-    )
-)
-
-fact_payments_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_payments")
-
-
-# Mapping des payments avec la dim_clients pour obtenir MASTER_CLIENT_ID
-
-fact_payments_gold_mapped = fact_payments_gold.join(
-    fact_contrats_gold.select("CONTRAT_ID", "MASTER_CLIENT_ID"),
-    "CONTRAT_ID",
-    how="left"
-).select(
-    "PAYMENT_ID",
-    "CONTRAT_ID",
-    "MASTER_CLIENT_ID",
-    "DATE_PAYMENT",
-    "MONTANT_INDEMNISE",
-    "MODE_PAYMENT"
-)
-
-display(fact_payments_gold_mapped)
-
-fact_payments_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_payments_mapped")
-
-'''
-
-
-#Dossier 3 (Suite) : SONAR_TESTs unitaires, Qualité & Dashboards
-
-#Question 1 & 2 : SONAR_TESTs unitaires PySpark & SONAR_TEST Coverage
-# Pour valider votre code (compatible avec les SONAR_TESTs unitaires PySpark) :
-
-# voir cellule 3
-
-
-
-
-#Question 3 : Identification d'un bug potentiel dans le pipeline
-"""
-•	Bug identifié : Clés primaires dupliquées après l'UNION simple.
-
-•	Explication : Si AbAssurance et AssurePlus utilisent tous deux des identifiants numériques séquentiels (ID_CLIENT = 101 dans Oracle et CustomerID = 101 dans SQL Server), faire une simple jointure entraîne de fausses associations.
-
-•	Correction : Toujours créer une clé composite (source_system + original_id) ou générer une clé surrogate unique via UUID / dense_rank() comme réalisé dans l'étape 3.
-
-"""
-
-"""
-# Création du Dashboard directement sous Databricks
-# Pour réaliser les visualisations demandées : 
-
-
-#1.	Créez une nouvelle cellule SQL dans votre notebook.
-
-#2.	Exécutez les 4 requêtes ci-dessous.
-
-#3.	Cliquez sur l'icône "+" à côté des résultats de la cellule -> Visualization, sélectionnez le type de graphique, puis cliquez sur Add to Dashboard. 
-"""
-"""
-#SQL
-#-- 1. Répartition des clients par Ville (Graphique Camembert / Pie Chart)
-SELECT ville, COUNT(DISTINCT master_client_id) as total_clients
-FROM gold_dim_client
-GROUP BY ville;
-
-#-- 2. Statistiques Contrats (Graphique en Barres)
-SELECT type_contrat, COUNT(contrat_id) as nb_contrats, SUM(montant_prime) as total_primes
-FROM gold_fact_contrat
-GROUP BY type_contrat;
-
-#-- 3. Statistiques Sinistres & Financières (Indicateurs / Counter Widgets)
-SELECT 
-SUM(c.montant_prime) as Chiffre_Affaires_Total,
-SUM(s.montant_indemnise) as Total_Indemnites_Versees,
-ROUND((SUM(s.montant_indemnise) / SUM(c.montant_prime)) * 100, 2) as Ratio_Sinistralite_Pourcent
-FROM gold_fact_contrat c
-LEFT JOIN gold_fact_sinistres ON c.contrat_id = s.contrat_id;
-
-#-- 4. Matrice des Doublons (Tableau filtré)
-SELECT master_client_id, nom, prenom, COUNT(*) as nombre_de_comptes
-FROM gold_dim_client
-GROUP BY master_client_id, nom, prenom
-HAVING COUNT(*) > 1;
-"""
-"""
-Résumé des livrables pour votre rendu :
-1.	Document de cadrage/spécifications : Reprenez les sections du Dossier 1 (Sujet 1). 
-
-2.	Schéma Data Flow : Exportez le schéma ASCII fourni dans le Dossier 3 (Sujet 1). 
-
-3.	Agilité & Risques : Utilisez les tickets Trello et la matrice des risques rédigés dans le Sujet 2. 
-
-4.	Code & Dashboard : Exécutez le script PySpark complet sous Databricks Community Edition pour générer les tables Delta et publier le tableau de bord interactif.
-
-"""
-
-
-
-
+# MAGIC
+# MAGIC %restart_python
+# MAGIC
+# MAGIC
+# MAGIC # Étape 1 : Simulation des jeux de données Oracle & SQL Server et enregistrementen bronze
+# MAGIC
+# MAGIC
+# MAGIC from pyspark.sql import SparkSession
+# MAGIC from pyspark.sql.functions import initcap, col, lower, upper, trim, concat_ws, levenshtein, when, lit, count, sum as _sum, avg, round, to_date
+# MAGIC from pyspark.sql.types import *
+# MAGIC from pyspark.sql.functions import *
+# MAGIC import pandas as pd
+# MAGIC from datetime import datetime
+# MAGIC from pyspark.sql.window import Window
+# MAGIC
+# MAGIC
+# MAGIC from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
+# MAGIC from pyspark.sql import functions as F
+# MAGIC
+# MAGIC
+# MAGIC # Initialisation Spark
+# MAGIC # spark = SparkSession.builder.appName("AssuranceData").getOrCreate()   Apparemment non nécessaire
+# MAGIC
+# MAGIC
+# MAGIC # Importer des SONAR_FONC de SRC
+# MAGIC import sys
+# MAGIC import os
+# MAGIC
+# MAGIC # 1  Récupérer le chemin absolu du dossier courant (NOTEBOOK)
+# MAGIC current_dir = os.getcwd()
+# MAGIC
+# MAGIC # 2 CORRECTION : Remonter d'un niveau (dossier parent) avant d'aller dans SRC
+# MAGIC src_path = os.path.abspath(os.path.join(current_dir, "..", "SRC"))
+# MAGIC
+# MAGIC print("----SRC path -------------", src_path)
+# MAGIC
+# MAGIC # 3 L'ajouter au chemin système
+# MAGIC if src_path not in sys.path:
+# MAGIC     sys.path.append(src_path)
+# MAGIC
+# MAGIC print("SRC Path")
+# MAGIC # Importations des Données oracle
+# MAGIC
+# MAGIC # 4. Importer à partir du  SONAR_FONC_*
+# MAGIC
+# MAGIC from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
+# MAGIC
+# MAGIC
+# MAGIC df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
+# MAGIC # Affichage des Dataframes
+# MAGIC print("\n # Affichage des Dataframes")
+# MAGIC
+# MAGIC print(df_ab_clients.first())
+# MAGIC print(df_ab_contrats.first())
+# MAGIC print(df_ab_sinistres.first())
+# MAGIC print(df_ab_payments.first())
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Protection des données
+# MAGIC def protection_bronze(df2, source):
+# MAGIC     
+# MAGIC     salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
+# MAGIC     
+# MAGIC     if source == "Oracle":
+# MAGIC     
+# MAGIC
+# MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AB_EMAIL"), F.lit(salt)), 256),
+# MAGIC
+# MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
+# MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
+# MAGIC     else: 
+# MAGIC     
+# MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
+# MAGIC      "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
+# MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
+# MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
+# MAGIC     return df2
+# MAGIC
+# MAGIC # Protection bronze
+# MAGIC
+# MAGIC df_ab_clients_bronze = protection_bronze(df_ab_clients,"Oracle")
+# MAGIC
+# MAGIC print("/n est ce que df_ab_clients est protégé à la sortie de la SONAR_FONCtion protection_bronze ", df_ab_clients)
+# MAGIC
+# MAGIC  #==================================================
+# MAGIC # PROTECTION ET VERIFIACTION CONTRAT   SINISTRE PAIEMENT
+# MAGIC
+# MAGIC # Affichage des DataFrames pour voir la différence
+# MAGIC print("=== df_ab_clients ===")
+# MAGIC df_ab_clients.show(10, truncate=False)
+# MAGIC print("=== df_ab_clients_protege ===")
+# MAGIC df_ab_clients_bronze.show(10, truncate=False)
+# MAGIC
+# MAGIC
+# MAGIC print("=== df_ab_contrats ===")
+# MAGIC df_ab_contrats.show(10, truncate=False)
+# MAGIC
+# MAGIC print("=== df_ab_sinistres ===")
+# MAGIC df_ab_sinistres.show(10, truncate=False)
+# MAGIC
+# MAGIC print("=== df_ab_payments ===")
+# MAGIC df_ab_payments.show(10, truncate=False)
+# MAGIC
+# MAGIC
+# MAGIC # Ingestion des données SQLServer
+# MAGIC
+# MAGIC # Données AssurPlus SQLserver
+# MAGIC
+# MAGIC # Import load_ap_data 
+# MAGIC from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
+# MAGIC
+# MAGIC # Obtention des dataframes
+# MAGIC df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data(spark)
+# MAGIC
+# MAGIC  # Scinder en nom et prénom le full name de Assurplus
+# MAGIC def split_full_name(df,col_last_name, col_first_name,col_full_name):
+# MAGIC
+# MAGIC  df = df.withColumn(col_last_name, F.trim(F.split(F.col(col_full_name), " ").getItem(1))) \
+# MAGIC              .withColumn(col_first_name, F.trim(F.split(F.col(col_full_name), " ").getItem(0)))
+# MAGIC  return df
+# MAGIC  # Extraire le nom et prénom à partir du Full_name
+# MAGIC df_ap_clients = split_full_name(df_ap_clients,"AP_NOM","AP_PRENOM","AP_FULL_NAME")
+# MAGIC
+# MAGIC
+# MAGIC # Protection des données
+# MAGIC
+# MAGIC df_ap_clients_bronze = protection_bronze(df_ap_clients,"SQLServer")
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Affichage df_ap_clients_bronze 
+# MAGIC print("=== ASSUREPLUS - Clients ===")
+# MAGIC df_ap_clients_bronze.show(10, truncate=False)
+# MAGIC
+# MAGIC print("=== ASSUREPLUS - Contrats ===")
+# MAGIC df_ap_contrats.show(10, truncate=False)
+# MAGIC
+# MAGIC print("=== ASSUREPLUS - Sinistres ===")
+# MAGIC df_ap_sinistres.show(10, truncate=False)
+# MAGIC
+# MAGIC print("=== ASSUREPLUS - Payments ===")
+# MAGIC df_ap_payments.show(10, truncate=False)
+# MAGIC
+# MAGIC
+# MAGIC # Enregistrement bronze
+# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
+# MAGIC
+# MAGIC df_ab_contrats_bronze = df_ab_contrats
+# MAGIC df_ab_sinistres_bronze = df_ab_sinistres
+# MAGIC df_ab_payments_bronze= df_ab_payments
+# MAGIC
+# MAGIC df_ap_contrats_bronze = df_ap_contrats
+# MAGIC df_ap_sinistres_bronze = df_ap_sinistres
+# MAGIC df_ap_payments_bronze= df_ap_payments
+# MAGIC
+# MAGIC #                                   ENREGISTREMENT EN BRONZE        
+# MAGIC # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
+# MAGIC
+# MAGIC # Tables Oracles
+# MAGIC enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
+# MAGIC enregistrement_bronze(df_ab_contrats_bronze,"workspace.bronze.oracle_contrats")
+# MAGIC enregistrement_bronze(df_ab_sinistres_bronze,"workspace.bronze.oracle_sinistres")
+# MAGIC enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
+# MAGIC
+# MAGIC # Tables SQL Server
+# MAGIC enregistrement_bronze(df_ap_clients_bronze,"workspace.bronze.sqlserver_clients")
+# MAGIC enregistrement_bronze(df_ap_contrats_bronze,"workspace.bronze.sqlserver_contrats")
+# MAGIC enregistrement_bronze(df_ap_payments_bronze,"workspace.bronze.sqlserver_payments")
+# MAGIC enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistres")
+# MAGIC
+# MAGIC
+# MAGIC #========================================================
+# MAGIC #*****   La couche Silver ****
+# MAGIC
+# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
+# MAGIC
+# MAGIC # Protection des données por la couche Silver
+# MAGIC def protection_silver(df2, source):
+# MAGIC     
+# MAGIC
+# MAGIC     salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
+# MAGIC     
+# MAGIC     if source == "Oracle":
+# MAGIC     
+# MAGIC
+# MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AB_EMAIL"), F.lit(salt)), 256),
+# MAGIC
+# MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
+# MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
+# MAGIC      return df2
+# MAGIC     else: 
+# MAGIC     
+# MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
+# MAGIC      "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
+# MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
+# MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
+# MAGIC      return df2
+# MAGIC
+# MAGIC
+# MAGIC # Ajout des données pour avoir la trace
+# MAGIC
+# MAGIC
+# MAGIC from SONAR_FONC_GARDER_LA_TRACE import ajoutmétadonnées
+# MAGIC
+# MAGIC
+# MAGIC # ORACLE
+# MAGIC df_ab_clients =ajoutmétadonnées (df_ab_clients,"Oracle","Oracle_clients.csv","AB_CLIENT_ID")
+# MAGIC
+# MAGIC #SQL Server
+# MAGIC df_ap_clients =ajoutmétadonnées (df_ap_clients,"SQL","SQL_clients.csv","AP_USER_ID")
+# MAGIC
+# MAGIC
+# MAGIC df_ab_clients.show(10, truncate=False)
+# MAGIC df_ap_clients.show(10, truncate=False)
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Étape 2 : Data Pipeline - Harmonisation & Unification (Silver Layer)
+# MAGIC
+# MAGIC """
+# MAGIC
+# MAGIC Schéma client final :
+# MAGIC
+# MAGIC MASTER_CLIENT_ID
+# MAGIC SOURCE_SYSTEM
+# MAGIC SOURCE_CLIENT_ID
+# MAGIC NOM
+# MAGIC PRENOM
+# MAGIC NOM_COMPLET
+# MAGIC DATE_NAISSANCE
+# MAGIC EMAIL
+# MAGIC TELEPHONE
+# MAGIC ADRESSE
+# MAGIC CODE_POSTAL
+# MAGIC NUMERO_FISCAL
+# MAGIC DATE_CREATION
+# MAGIC STATUT_CLIENT
+# MAGIC SCORE_FIDELITE
+# MAGIC DATE_INTEGRATION
+# MAGIC SOURCE_FILE
+# MAGIC INGESTION_TIMESTAMP
+# MAGIC VILLE     je ne l'ai pas rajouté
+# MAGIC
+# MAGIC
+# MAGIC """
+# MAGIC
+# MAGIC # Nettoyage des données
+# MAGIC #========================  AJOUTER            CONTRAT SINISTRE ET PAYMENTS
+# MAGIC
+# MAGIC from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import data_cleaning
+# MAGIC
+# MAGIC df_ab_clients, df_ap_clients= data_cleaning(df_ab_clients,df_ap_clients)
+# MAGIC  
+# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
+# MAGIC
+# MAGIC
+# MAGIC #                                   ENREGISTREMENT EN SILVER        
+# MAGIC # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données 
+# MAGIC
+# MAGIC
+# MAGIC # Hacher les données avant l'enregistrement
+# MAGIC df_ab_clients_silver = protection_silver(df_ab_clients,"Oracle")
+# MAGIC  # à faire drop 
+# MAGIC df_ab_contrats_silver = df_ab_contrats
+# MAGIC df_ab_sinistres_silver = df_ab_sinistres
+# MAGIC df_ab_payments_silver= df_ab_payments
+# MAGIC
+# MAGIC df_ap_clients_silver = protection_silver(df_ap_clients,"SQLServer")
+# MAGIC # à faire drop 
+# MAGIC df_ap_contrats_silver = df_ap_contrats
+# MAGIC df_ap_sinistres_silver = df_ap_sinistres
+# MAGIC df_ap_payments_silver= df_ap_payments
+# MAGIC
+# MAGIC
+# MAGIC # Tables Oracle
+# MAGIC enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients")
+# MAGIC enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats")
+# MAGIC enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres")
+# MAGIC enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments")
+# MAGIC
+# MAGIC # Tables SQL Server
+# MAGIC enregistrement_silver(df_ap_clients_silver,"workspace.silver.sqlserver_clients")
+# MAGIC enregistrement_silver(df_ap_contrats_silver,"workspace.silver.sqlserver_contrats")
+# MAGIC enregistrement_silver(df_ap_payments_silver,"workspace.silver.sqlserver_payments")
+# MAGIC enregistrement_silver(df_ap_sinistres_silver,"workspace.silver.sqlserver_sinistres")
+# MAGIC
+# MAGIC
+# MAGIC #####   ICI NORMALEMENT COMMENCE LA COUCHE GOLD ###################################
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC from SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
+# MAGIC
+# MAGIC
+# MAGIC dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
+# MAGIC print("dim_clients")
+# MAGIC dim_clients.show(truncate = False)
+# MAGIC
+# MAGIC
+# MAGIC # Étape 3 : Matrice de Doublons et Création de la Dimension Client
+# MAGIC
+# MAGIC from SONAR_FONC_MATRICE_DOUBLONS import generer_matrice_doublons
+# MAGIC
+# MAGIC # Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance ou Téléphone)
+# MAGIC from pyspark.sql.window import Window
+# MAGIC from pyspark.sql.functions import dense_rank, upper, initcap
+# MAGIC
+# MAGIC
+# MAGIC # Hypothèse : df_clients_initial est votre DataFrame propre d'origine
+# MAGIC # Si vous n'avez que dim_clients, assurez-vous de réexécuter la cellule du dessus qui le génère initialement.
+# MAGIC
+# MAGIC # res_matched, res_dim, res_doublons, res_df = generer_Matrice_Doublons(dim_clients)     ceci marche 
+# MAGIC matched_clients, dim_clients, doublons_df,result_df =generer_matrice_doublons(dim_clients)
+# MAGIC
+# MAGIC print("Matrice des doublons")
+# MAGIC display(dim_clients.join(doublons_df, "MASTER_CLIENT_ID"))
+# MAGIC
+# MAGIC # Protection GOLD
+# MAGIC
+# MAGIC def protection_gold(df):
+# MAGIC     
+# MAGIC     salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
+# MAGIC     
+# MAGIC     df = df.withColumns({"Email_Hached": F.sha2(F.concat(F.col("EMAIL"), F.lit(salt)), 256),
+# MAGIC
+# MAGIC     "Nom_Hached": F.sha2(F.concat(F.col("NOM"), F.lit(salt)), 256),
+# MAGIC     "Prenom_Hached": F.sha2(F.concat(F.col("PRENOM"), F.lit(salt)), 256),
+# MAGIC     "Date_de_naissance_Hached": F.sha2(F.concat(F.col("DATE_NAISSANCE"), F.lit(salt)), 256),
+# MAGIC     "Numero_fiscal_Hached": F.sha2(F.concat(F.col("NUMERO_FISCAL"), F.lit(salt)), 256),
+# MAGIC     "Adresse_Hached": F.sha2(F.concat(F.col("ADRESSE"), F.lit(salt)), 256),
+# MAGIC     "TELEPHONE_Hached": F.sha2(F.concat(F.col("TELEPHONE"), F.lit(salt)), 256)}).drop("NOM", "PRENOM","EMAIL","DATE_NAISSANCE", "NUMERO_FISCAL", "ADRESSE", "TELEPHONE")
+# MAGIC
+# MAGIC     return df
+# MAGIC
+# MAGIC print(" ------Matrice des doublons après Hachage---------------")
+# MAGIC
+# MAGIC dim_clients_protege= protection_gold(dim_clients)
+# MAGIC #dim_clients_gold = dim_clients_protege.drop("NOM","DATE_NAISSANCE","PRENOM")
+# MAGIC dim_clients_gold = dim_clients_protege
+# MAGIC display(dim_clients_gold.join(doublons_df, "MASTER_CLIENT_ID"))
+# MAGIC
+# MAGIC # Enregistrment GOLD Client
+# MAGIC
+# MAGIC
+# MAGIC dim_clients_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.dim_clients_gold")
+# MAGIC
+# MAGIC
+# MAGIC # Étape 4 : Tables de Faits Contrats et Sinistres et payments (Gold Layer)
+# MAGIC
+# MAGIC from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
+# MAGIC
+# MAGIC # Unification Contrats
+# MAGIC
+# MAGIC fact_contrats_gold = unify_and_map_contrats(df_ab_contrats, df_ap_contrats, dim_clients)
+# MAGIC
+# MAGIC
+# MAGIC fact_contrats_gold.show(truncate=False)
+# MAGIC # faire une protection gold 
+# MAGIC
+# MAGIC fact_contrats_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_contrats")   # changer le nom de la table
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Unification Sinistres
+# MAGIC
+# MAGIC from  SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE   import unify_and_map_sinistres
+# MAGIC
+# MAGIC fact_sinistres_gold = unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold, table_name="workspace.gold.fact_sinistres")   # changer le nom de la table
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Unification payments
+# MAGIC
+# MAGIC from  SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT   import unify_and_map_payments
+# MAGIC
+# MAGIC fact_payments_gold_mapped = unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, table_name="workspace.gold.fact_payments") # changer le nom de la table
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC #Dossier 3 (Suite) : SONAR_TESTs unitaires, Qualité & Dashboards
+# MAGIC
+# MAGIC #Question 1 & 2 : SONAR_TESTs unitaires PySpark & SONAR_TEST Coverage
+# MAGIC # Pour valider votre code (compatible avec les SONAR_TESTs unitaires PySpark) :
+# MAGIC
+# MAGIC # voir cellule 3
+# MAGIC
+# MAGIC
+# MAGIC # Question 3 : Identification d'un bug potentiel dans le pipeline
+# MAGIC """
+# MAGIC •	Bug identifié : Clés primaires dupliquées après l'UNION simple.
+# MAGIC
+# MAGIC •	Explication : Si AbAssurance et AssurePlus utilisent tous deux des identifiants numériques séquentiels (ID_CLIENT = 101 dans Oracle et CustomerID = 101 dans SQL Server), faire une simple jointure entraîne de fausses associations.
+# MAGIC
+# MAGIC •	Correction : Toujours créer une clé composite (source_system + original_id) ou générer une clé surrogate unique via UUID / dense_rank() comme réalisé dans l'étape 3.
+# MAGIC
+# MAGIC """
+# MAGIC
+# MAGIC """
+# MAGIC # Création du Dashboard directement sous Databricks
+# MAGIC # Pour réaliser les visualisations demandées : 
+# MAGIC
+# MAGIC
+# MAGIC #1.	Créez une nouvelle cellule SQL dans votre notebook.
+# MAGIC
+# MAGIC #2.	Exécutez les 4 requêtes ci-dessous.
+# MAGIC
+# MAGIC #3.	Cliquez sur l'icône "+" à côté des résultats de la cellule -> Visualization, sélectionnez le type de graphique, puis cliquez sur Add to Dashboard. 
+# MAGIC """
+# MAGIC """
+# MAGIC #SQL
+# MAGIC #-- 1. Répartition des clients par Ville (Graphique Camembert / Pie Chart)
+# MAGIC SELECT ville, COUNT(DISTINCT master_client_id) as total_clients
+# MAGIC FROM gold_dim_client
+# MAGIC GROUP BY ville;
+# MAGIC
+# MAGIC #-- 2. Statistiques Contrats (Graphique en Barres)
+# MAGIC SELECT type_contrat, COUNT(contrat_id) as nb_contrats, SUM(montant_prime) as total_primes
+# MAGIC FROM gold_fact_contrat
+# MAGIC GROUP BY type_contrat;
+# MAGIC
+# MAGIC #-- 3. Statistiques Sinistres & Financières (Indicateurs / Counter Widgets)
+# MAGIC SELECT 
+# MAGIC SUM(c.montant_prime) as Chiffre_Affaires_Total,
+# MAGIC SUM(s.montant_indemnise) as Total_Indemnites_Versees,
+# MAGIC ROUND((SUM(s.montant_indemnise) / SUM(c.montant_prime)) * 100, 2) as Ratio_Sinistralite_Pourcent
+# MAGIC FROM gold_fact_contrat c
+# MAGIC LEFT JOIN gold_fact_sinistres ON c.contrat_id = s.contrat_id;
+# MAGIC
+# MAGIC #-- 4. Matrice des Doublons (Tableau filtré)
+# MAGIC SELECT master_client_id, nom, prenom, COUNT(*) as nombre_de_comptes
+# MAGIC FROM gold_dim_client
+# MAGIC GROUP BY master_client_id, nom, prenom
+# MAGIC HAVING COUNT(*) > 1;
+# MAGIC """
+# MAGIC """
+# MAGIC Résumé des livrables pour votre rendu :
+# MAGIC  
+# MAGIC
+# MAGIC 4.	Code & Dashboard : Exécutez le script PySpark complet sous Databricks Community Edition pour générer les tables Delta et publier le tableau de bord interactif.
+# MAGIC
+# MAGIC """
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
 
 # COMMAND ----------
 
@@ -866,7 +608,7 @@ for f in ingestion_files + other_files:
 # (dans le fichier TESTS d'ingestion Oracle, la création au niveau module est dans un docstring = code mort)
 df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
 # Idem pour les DataFrames AssurePlus (df_ap_*), utilisés notamment par harmonize_clients
-df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data()
+df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data(spark)
 
 # Import des fonctions de tests
 import unittest
@@ -947,7 +689,7 @@ def clean_email(value):
 
 # Alias : le test appelle generer_matrice_doublons (en minuscules),
 # or la fonction SRC s'appelle generer_Matrice_Doublons
-generer_matrice_doublons = generer_Matrice_Doublons
+#generer_matrice_doublons = generer_matrice_oublons
 
 class TestETLPipeline(unittest.TestCase):
     def test_clean_email(self):
@@ -1017,7 +759,7 @@ class TestETLPipeline(unittest.TestCase):
 
     #test_load_ap_data()
     def test1_load_ap_data(self):
-        load_ap_data()
+        load_ap_data(spark)
 
     def test1_enregistrement_bronze(self):
         test_enregistrement_bronze()
@@ -1030,7 +772,7 @@ class TestETLPipeline(unittest.TestCase):
 # test_harmonize_clients()
 
 
-    def test1_generer_Matrice_Doublons(self):
+    def test1_generer_matrice_doublons(self):
       test_generer_matrice_doublons()
 
     def test1_save_dim_client_to_gold(self):
@@ -1295,8 +1037,8 @@ class SONAR_TESTETLPipeline(unitSONAR_TEST.SONAR_TESTCase):
     def SONAR_TEST1_enregistrement_silver(self):
        SONAR_TEST_enregistrement_silver()
 # SONAR_TEST_harmonize_clients()
-    def SONAR_TEST1_generer_Matrice_Doublons(self):
-      SONAR_TEST_generer_Matrice_Doublons()
+    def SONAR_TEST1_generer_matrice_doublons(self):
+      SONAR_TEST_generer_matrice_doublons()
     def SONAR_TEST1_save_dim_client_to_gold(self):
       SONAR_TEST_save_dim_client_to_gold()
 # SONAR_TEST_SONAR_unify_and_map_contrats()  # SONAR_TEST file not found - skipped
