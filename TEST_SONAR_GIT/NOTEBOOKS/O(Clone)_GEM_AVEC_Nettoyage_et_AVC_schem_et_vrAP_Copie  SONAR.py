@@ -186,21 +186,13 @@
 # MAGIC df_ap_payments.show(5, truncate=False)
 # MAGIC
 # MAGIC
-# MAGIC
-# MAGIC
-# MAGIC # Enregistrement bronze
-# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
-# MAGIC
+# MAGIC # ENREGISTREMENT EN BRONZE DES DONNEES SQLServer
 # MAGIC
 # MAGIC
 # MAGIC df_ap_contrats_bronze = df_ap_contrats
 # MAGIC df_ap_sinistres_bronze = df_ap_sinistres
 # MAGIC df_ap_payments_bronze= df_ap_payments
-# MAGIC
-# MAGIC #                                   ENREGISTREMENT EN BRONZE        
-# MAGIC # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
-# MAGIC
-# MAGIC
+# MAGIC       
 # MAGIC # Tables SQL Server
 # MAGIC enregistrement_bronze(df_ap_clients_bronze,"workspace.bronze.sqlserver_clients")
 # MAGIC enregistrement_bronze(df_ap_contrats_bronze,"workspace.bronze.sqlserver_contrats")
