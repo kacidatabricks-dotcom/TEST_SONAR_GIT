@@ -197,7 +197,8 @@
 # MAGIC
 # MAGIC
 # MAGIC #========================================================
-# MAGIC #*****   La couche Silver ****
+# MAGIC #*****   COUCHE SILVER 
+# MAGIC #=====================================================
 # MAGIC
 # MAGIC
 # MAGIC #*************************************************
@@ -269,19 +270,19 @@
 # MAGIC ))
 # MAGIC
 # MAGIC
-# MAGIC # Exécution sur AB
+# MAGIC # Dtection des incohérences pour Ab Assurance
 # MAGIC df_ab_contrats_clean, df_ab_contrats_rejetes = suppression_incoherences(
 # MAGIC     df_ab_contrats,
 # MAGIC     controles_contrats.copy(),
 # MAGIC     colonnes_dates=["AB_DATE_DEBUT", "AB_DATE_FIN"],
 # MAGIC     cle_primaire="AB_POLICY_NUMBER"
 # MAGIC )
-# MAGIC print(" les contrats valides")
-# MAGIC df_ab_contrats_clean.show()
+# MAGIC print(" les contrats valides Ab Assurance")
+# MAGIC df_ab_contrats_clean.show(5)
 # MAGIC print(" les contrats rejetés")
-# MAGIC df_ab_contrats_rejetes.show()
+# MAGIC df_ab_contrats_rejetes.show(5)
 # MAGIC
-# MAGIC # Contrôles qualité spécifiques aux contrats AssurPlus (schéma AP)
+# MAGIC # Detection incohérences  spécifiques aux contrats AssurPlus
 # MAGIC controles_contrats_ap = [
 # MAGIC
 # MAGIC     # Valeurs obligatoires
@@ -336,13 +337,17 @@
 # MAGIC     )
 # MAGIC ]
 # MAGIC
-# MAGIC # Exécution sur AP
+# MAGIC # # Dtection des incohérences pour AssurePlus
 # MAGIC df_ap_contrats_clean, df_ap_contrats_rejetes = suppression_incoherences(
 # MAGIC     df_ap_contrats,
 # MAGIC     controles_contrats_ap,
 # MAGIC     colonnes_dates=["AP_START_DATE", "AP_END_DATE"],
 # MAGIC     cle_primaire="AP_CONTRACT_REF"
 # MAGIC )
+# MAGIC print(" les contrats valides AssurePlus")
+# MAGIC df_ap_contrats_clean.show(5)
+# MAGIC print(" les contrats rejetés")
+# MAGIC df_ap_contrats_rejetes.show(5)
 # MAGIC
 # MAGIC
 # MAGIC # ============================================================
@@ -413,7 +418,7 @@
 # MAGIC
 # MAGIC
 # MAGIC
-# MAGIC # Exécution sur AB
+# MAGIC # 
 # MAGIC df_ab_sinistres_clean, df_ab_sinistres_rejetes = suppression_incoherences(
 # MAGIC     df_ab_sinistres,
 # MAGIC     controles_sinistres_ab.copy(),
@@ -422,8 +427,12 @@
 # MAGIC     contrats_valides=df_ab_contrats_clean
 # MAGIC )
 # MAGIC
+# MAGIC print(" les sinistres valides AbAssurance")
+# MAGIC df_ab_sinistres_clean.show(5)
+# MAGIC print(" les sinistres rejetés")
+# MAGIC df_ab_sinistres_rejetes.show(5)
 # MAGIC
-# MAGIC # Exécution sur AP
+# MAGIC # Dtecetion des incohérences (sinistres) relatives à AssurePlus
 # MAGIC df_ap_sinistres_clean, df_ap_sinistres_rejetes = suppression_incoherences(
 # MAGIC     df_ap_sinistres,
 # MAGIC     controles_sinistres_ap.copy(),
@@ -432,6 +441,10 @@
 # MAGIC     contrats_valides=df_ap_contrats_clean
 # MAGIC )
 # MAGIC
+# MAGIC print(" les sinistres valides AssurePlus")
+# MAGIC df_ap_sinistres_clean.show(5)
+# MAGIC print(" les sinistres rejetés")
+# MAGIC df_ap_sinistres_rejetes.show(5)
 # MAGIC
 # MAGIC
 # MAGIC
@@ -472,7 +485,6 @@
 # MAGIC
 # MAGIC
 # MAGIC
-# MAGIC
 # MAGIC controles_payments_ap = [
 # MAGIC
 # MAGIC     (
@@ -504,7 +516,7 @@
 # MAGIC     )
 # MAGIC ]
 # MAGIC
-# MAGIC # Exécution sur AB
+# MAGIC # Incohérences Payments AbAssurance
 # MAGIC df_ab_payments_clean, df_ab_payments_rejetes = suppression_incoherences(
 # MAGIC     df_ab_payments,
 # MAGIC     controles_payments_ab.copy(),
@@ -720,7 +732,7 @@
 # MAGIC dim_clients_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.dim_clients_gold")
 # MAGIC
 # MAGIC
-# MAGIC # Étape 4 : Tables de Faits Contrats et Sinistres et payments (Gold Layer)
+# MAGIC # Traitements  Tables de Faits Contrats et Sinistres et payments , Couche Gold
 # MAGIC
 # MAGIC from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
 # MAGIC
@@ -732,7 +744,7 @@
 # MAGIC fact_contrats_gold.show(truncate=False)
 # MAGIC # faire une protection gold 
 # MAGIC
-# MAGIC fact_contrats_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_contrats")   # changer le nom de la table
+# MAGIC fact_contrats_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_contrats")   # changer le nom de la table?
 # MAGIC
 # MAGIC
 # MAGIC
