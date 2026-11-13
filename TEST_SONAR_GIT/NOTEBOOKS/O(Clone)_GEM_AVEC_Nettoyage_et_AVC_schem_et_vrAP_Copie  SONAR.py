@@ -3,7 +3,6 @@
 # [tool.databricks.environment]
 # environment_version = "6"
 # ///
-# MAGIC
 # MAGIC %restart_python
 # MAGIC  
 
@@ -144,8 +143,6 @@
 # MAGIC enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
 # MAGIC
 # MAGIC
-# MAGIC
-# MAGIC
 # MAGIC #============================================
 # MAGIC # Ingestion des données SQLServer
 # MAGIC #============================================
@@ -166,7 +163,7 @@
 # MAGIC df_ap_clients = split_full_name(df_ap_clients,"AP_NOM","AP_PRENOM","AP_FULL_NAME")
 # MAGIC
 # MAGIC
-# MAGIC # Protection des données
+# MAGIC # Hachage des données
 # MAGIC
 # MAGIC df_ap_clients_bronze = protection_bronze(df_ap_clients,"SQLServer")
 # MAGIC
@@ -188,7 +185,6 @@
 # MAGIC
 # MAGIC # ENREGISTREMENT EN BRONZE DES DONNEES SQLServer
 # MAGIC
-# MAGIC
 # MAGIC df_ap_contrats_bronze = df_ap_contrats
 # MAGIC df_ap_sinistres_bronze = df_ap_sinistres
 # MAGIC df_ap_payments_bronze= df_ap_payments
@@ -198,7 +194,6 @@
 # MAGIC enregistrement_bronze(df_ap_contrats_bronze,"workspace.bronze.sqlserver_contrats")
 # MAGIC enregistrement_bronze(df_ap_payments_bronze,"workspace.bronze.sqlserver_payments")
 # MAGIC enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistres")
-# MAGIC
 # MAGIC
 # MAGIC
 # MAGIC #========================================================
