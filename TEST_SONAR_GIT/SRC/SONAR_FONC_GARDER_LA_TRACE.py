@@ -1,4 +1,4 @@
-# Ajout des données pour avoir la trace
+# Ajout des données pour avoir la trace    # .withColumn("ORIGINAL_ID", F.col(client_id_col).cast("string")) \
 
 
 from pyspark.sql import functions as F
@@ -12,7 +12,7 @@ def ajoutmétadonnées(df, source_system, source_file, client_id_col):
      print("ajout des métadonnées")
      return df \
         .withColumn("SOURCE_SYSTEM", F.lit(source_system)) \
-        .withColumn("ORIGINAL_ID", F.col(client_id_col).cast("string")) \
+        .withColumn("ORIGINAL_ID", F.col(client_id_col)) \
         .withColumn("SOURCE_FILE", F.lit(source_file)) \
         .withColumn("INGESTION_TIMESTAMP", F.current_timestamp())
 

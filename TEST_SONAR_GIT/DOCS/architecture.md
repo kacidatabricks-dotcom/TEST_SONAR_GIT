@@ -27,6 +27,8 @@ AB CSV --------\
                 > Spark -> Bronze -> Silver -> Gold -> Dashboard
 AP CSV --------/
 ```
+![Architecture du projet](./Architecture Databricks Free Edition.jpg)
+
 
 ## Pourquoi Bronze/Silver/Gold ?
 

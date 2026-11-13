@@ -178,14 +178,42 @@ def create_ab_dataframes(spark):
         ]
         
         # création des dataframes
-        print("Création des Ab dataframes")
-        df_ab_clients = spark.createDataFrame(ab_clients_data, schema=ab_clients_schema)
-        df_ab_contrats = spark.createDataFrame(ab_contrats_data, schema=ab_contrats_schema)
-        #Transformation de la prime annuelle en prime mensuelle
+
+        df_ab_clients = (
+        spark.read.format("csv")
+        .option("header", True)
+        .schema(ab_clients_schema)
+         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_clients.csv"))
+
+        df_ab_contrats = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true")
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_contrats.csv"))
+
         df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
 
-        df_ab_sinistres = spark.createDataFrame(ab_sinistres_data, schema=ab_sinistres_schema)
-        df_ab_payments = spark.createDataFrame(ab_payments_data, schema=ab_payments_schema)
+        df_ab_sinistres = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true")
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_sinistres.csv"))
+
+        df_ab_payments = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true")
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_payments.csv"))
+
+        print("Création des Ab dataframes")
+        #df_ab_clients = spark.createDataFrame(ab_clients_data, schema=ab_clients_schema)
+        #df_ab_contrats = spark.createDataFrame(ab_contrats_data, schema=ab_contrats_schema)
+
+        #Transformation de la prime annuelle en prime mensuelle
+        # df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
+
+        #df_ab_sinistres = spark.createDataFrame(ab_sinistres_data, schema=ab_sinistres_schema)
+        #df_ab_payments = spark.createDataFrame(ab_payments_data, schema=ab_payments_schema)
         
     
         #  ACTION FORCÉE : On oblige Spark à analyser les données maintenant

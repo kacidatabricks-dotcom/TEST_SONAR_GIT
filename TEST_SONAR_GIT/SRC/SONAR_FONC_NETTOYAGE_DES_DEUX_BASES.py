@@ -1,12 +1,15 @@
 # Étape 2 : Data Pipeline - Harmonisation & Unification (Silver Layer)
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import initcap, col, lower, upper, trim, concat_ws, levenshtein, when, lit, count, sum as _sum, avg, round, to_date
+from pyspark.sql.functions import initcap, col, lower, upper, trim, concat_ws, levenshtein, when, lit, count,concat, sum as _sum, avg, round, to_date, regexp_extract, regexp_replace, rlike
+
+
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
 import pandas as pd
 from datetime import datetime
 from pyspark.sql.window import Window
+import re
 
 
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
@@ -35,82 +38,10 @@ SOURCE_FILE
 INGESTION_TIMESTAMP
 VILLE     je ne l'ai pas rajouté
 
-
-
-
-
-# -------------------       NETTOYAGE  -------------------------------
-
- # Scinder en nom et prénom le full name de Assurplus
-def split_full_name(df,col_last_name, col_first_name,col_full_name):
-
- df = df.withColumn(col_last_name, F.trim(F.split(F.col(col_full_name), " ").getItem(1))) \
-             .withColumn(col_first_name, F.trim(F.split(F.col(col_full_name), " ").getItem(0)))
- return df
-
-# df_ap_clients = split_full_name(df_ap_clients,"AP_NOM","AP_PRENOM","AP_FULL_NAME")  appelée dans le programme principal
-
-# Nettoyage des noms 
-from pyspark.sql import functions as F
-
-
-
-# Nettoyage des noms des clients ORACLE
-
-# appele du progarme principal df_ab_clients non connu ici 
-
-df_ab_clients = clean_last_name(df_ab_clients,"AB_NOM")
-
-# Nettoyage des noms des users SQLServer
-
-df_ap_clients = clean_last_name(df_ap_clients,"AP_NOM")
-
-
-
-# Nettoyage des prénoms
-
-
-
-# 2. Application  sur le DataFrame Oracle
-# df_ab_clients = df_ab_clients.withColumn("AB_PRENOM", normalize_firstname("AB_PRENOM"))
-
-# 3. Application  sur le DataFrame SQL
-#df_ap_clients= df_ap_clients.withColumn("AP_PRENOM", normalize_firstname("AP_PRENOM"))
-
-# nettoyage des Emails
-
-# 1. Définition de la fonction (elle prend un nom de colonne en chaîne de caractères)
-
-
-# 2. Application  sur le DataFrame Oracle
-#df_ab_clients = df_ab_clients.withColumn("AB_EMAIL", normalize_email("AB_EMAIL"))
-
-# 2. Application  sur le DataFrame SQL
-#df_ap_clients= df_ap_clients.withColumn("AP_MAIL_ADDRESS", normalize_email("AP_MAIL_ADDRESS"))
-
-# Nettoyage des dates 
-
-
-#appliquée à Oracle
-#df_ab_clients= normalize_date(df_ab_clients,"AB_DATE_NAISSANCE")
-#df_ab_clients= df_ab_clients.withColumn("AB_DATE_CREATION", to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
-
-#appliquée à SQL Server
-#df_ap_clients= normalize_date(df_ap_clients,"AP_BIRTH_DATE")
-#df_ap_clients= df_ap_clients.withColumn("AP_DATE_CREATION", to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
-
-
-# Nettoyage des numéros de Téléphone mais rajouter +33 
-
-
-
-# Appliquer la fonction aux colonnes de téléphone
-#df_ab_clients = normalize_phone_number(df_ab_clients, "AB_TELEPHONE")
-#df_ap_clients = normalize_phone_number(df_ap_clients, "AP_PHONE_NUMBER")
-#display(df_ab_clients)
-#display(df_ap_clients)
-
 """
+
+
+
 
 
 # Nettoyage des noms 
@@ -136,7 +67,7 @@ def normalize_email(column_name):
 
 # Nettoyage des dates 
 def normalize_date (df,col_name):
-  df= df.withColumn(col_name, to_date(col(col_name), "yyyy-MM-dd"))
+  df= df.withColumn(col_name, F.try_to_date(col(col_name), "yyyy-MM-dd"))    # j'ai mis try_to_date au lieu de to_date
   return df 
 
 # Nettoyage des numéros de Téléphone mais rajouter +33 
@@ -145,19 +76,9 @@ def normalize_date (df,col_name):
 # Correction de la fonction normalize_phone_number (format international)
 def normalize_phone_number(df, column_name):
     # Supprime tout sauf les chiffres et applique le format français
-    return df.withColumn(
-        column_name,
-        concat(
-            lit("+33"),
-            regexp_replace(
-                regexp_replace(col(column_name), r'[^0-9]', ''), r'^0', ''
-            )
-        )
-    )
+    return df.withColumn(column_name, concat(lit("+33"), regexp_replace(regexp_replace(col(column_name), r'[^0-9]', ''), r'^0', '') ))
 
-
-
-# -------------------       NETTOYAGE  -------------------------------
+# -------------------     NETTOYAGE  -------------------------------
 def data_cleaning(df1, df2):
 
 
@@ -168,8 +89,6 @@ def data_cleaning(df1, df2):
 # Nettoyage des noms des users SQLServer
 
  df2 = clean_last_name(df2,"AP_NOM")
-
-
 
 
 
@@ -191,22 +110,22 @@ def data_cleaning(df1, df2):
 
 #appliquée à Oracle
  df1= normalize_date(df1,"AB_DATE_NAISSANCE")
- df1= df1.withColumn("AB_DATE_CREATION", to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
+ 
 
 #appliquée à SQL Server
  df2= normalize_date(df2,"AP_BIRTH_DATE")
- df2= df2.withColumn("AP_DATE_CREATION", to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
-
+ #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
 
 
 # Appliquer la fonction aux colonnes de téléphone
- df1 = normalize_phone_number(df1, "AB_TELEPHONE")
- df2 = normalize_phone_number(df2, "AP_PHONE_NUMBER")
+ df1 = normalize_phone_number(df1 , "AB_TELEPHONE")
+ df2 = normalize_phone_number(df2 , "AP_PHONE_NUMBER")
 
  df1.show(truncate=False)
  df2.show(truncate=False)
 
- return df1, df2
-
-
+ return df1,df2
 

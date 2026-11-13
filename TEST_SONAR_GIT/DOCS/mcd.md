@@ -1,78 +1,91 @@
 # MCD cible proposé
 
 Entités :
-- CLIENT
-- CONTRAT
-- SINISTRE
-- PAIEMENT
+- DIM_CLIENTS
+- FACT_CONTRATS
+- FACT_SINISTRES
+- FACT_PAYMENTS
 
 Relations :
-- CLIENT 1,N CONTRAT
-- CONTRAT 1,N SINISTRE
-- CONTRAT 1,N PAIEMENT
+- CLIENTS 1,N CONTRATS
+- CONTRATS 1,N SINISTRES
+- CONTRATS1,N PAIEMENTS
 
 ## Identifiants techniques
 
-`client_id`, `contract_id`, `claim_id`, `payment_id`
+`MAQTER_CLIENT_ID`, `CONTRAT_ID`, `SINISTRE_ID`, `PAYMENT_ID`
 
 ## Traçabilité
 
 Chaque entité conserve :
-- `source_system`
-- `source_*_id`
+- `SOURCE_SYSTEM`
+- `ORIGINAL_ID`
+- `SOURCE_FILE`
 
 Cela permet de relier une ligne consolidée à son système d'origine.
 
-## CLIENT
-client_id
-source_system
-source_client_id
-nom
-prenom
-nom_complet
-date_naissance
-email
-telephone
-adresse
-code_postal
-numero_fiscal
-date_creation
-statut_client
-score_fidelite
-date_integration
+## DIM_CLIENTS
+- MASTER_CLIENT_ID: IntegerType (PK)
+- SOURCE_SYSTEM: StringType
+- ORIGINAL_ID: StringType
+- NOM: StringType
+- PRENOM: StringType
+- DATE_NAISSANCE: DateType
+- EMAIL: StringType
+- TELEPHONE: StringType
+- ADRESSE: StringType
+- CODE_POSTAL: StringType
+- NUMERO_FISCAL: StringType
+- DATE_CREATION: TimestampType
+- STATUT_CLIENT: StringType
+- INGESTION_TIMESTAMP: TimestampType
+- SOURCE_FILE: StringType
+- MATCH_KEY: StringType
 
-## CONTRAT
-contract_id
-contract_reference
-client_id
-source_system
-source_contract_id
-type_assurance
-date_debut
-date_fin
-prime_annuelle
-prime_mensuelle
-statut_contrat
-agence_code
-broker_code
 
-## SINISTRE
-claim_id
-contract_id
-source_system
-source_claim_id
-date_sinistre
-montant_estime
-statut_sinistre
-description
-fraud_score
+## FACT_CONTRATS
+- CONTRAT_ID
+- TYPE_CONTRAT
+- MASTER_CLIEND_ID
+- SOURCE_SYSTEM
+- SOURCE_FILE
+- ORIGINAL_ID
+- MONTANT_PRIME
+- STATUT_CONTRAT
+- DATE_DEBUT
+- DATE_FIN
+- AGENCE_ID
+- INGESTION_TIMESTAMP: TimestampType
 
-## PAIEMENT
-payment_id
-contract_id
-source_system
-source_payment_id
-date_paiement
-montant
-mode_paiement
-statut_transaction
+## FACT_SINISTRES
+
+- SOURCE_FILE
+- SOURCE_SYSTEM
+- ORIGINAL_ID
+- SINISTRE_ID: StringType (PK)
+- CONTRAT_ID: StringType (FK)
+- MASTER_CLIENT_ID: IntegerType (FK)
+- DATE_SINISTRE : DateType
+- MONTANT_INDEMNISE: DoubleType
+- STATUT_SINISTRE: StringType
+- DESCRIPTION : StringType
+- INGESTION_TIMESTAMP: TimestampType
+
+
+
+## FACT_PAYMENTS
+
+- PAYMENT_ID: StringType (PK)
+- SINISTRE_ID: StringType (FK)
+- MASTER_CLIENT_ID: IntegerType (FK)
+- POLICY_NUMBER: StringType
+- DATE_PAYMENT: Datetype
+- MONTANT: DoubleType
+- MODE_PAYMENT; StringType
+- SOURCE_SYSTEM
+- SOURCE_FILE
+- ORIGINAL_ID
+- STATUT_TRANSACTION
+- INGESTION_TIMESTAMP: TimestampType
+
+
