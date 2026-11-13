@@ -597,8 +597,8 @@
 # MAGIC df_ap_clients.show(10, truncate=False)
 # MAGIC
 # MAGIC
-# MAGIC
-# MAGIC
+# MAGIC #================================================
+# MAGIC ###   Revoir ceci 
 # MAGIC # Étape 2 : Data Pipeline - Harmonisation & Unification (Silver Layer)
 # MAGIC
 # MAGIC """
