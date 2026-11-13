@@ -182,8 +182,8 @@ def create_ab_dataframes(spark):
         df_ab_clients = (
         spark.read.format("csv")
         .option("header", True)
-        .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_clients.csv"))
+        .schema(ab_clients_schema)
+         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_clients.csv"))
 
         df_ab_contrats = (
         spark.read.format("csv")

@@ -46,43 +46,45 @@
 # MAGIC from pyspark.sql import functions as F
 # MAGIC
 # MAGIC
-# MAGIC # Initialisation Spark
-# MAGIC # spark = SparkSession.builder.appName("AssuranceData").getOrCreate()   Apparemment non nécessaire
+# MAGIC
+# MAGIC # Importer des fichiers des dossiers SRC et TESTS
 # MAGIC
 # MAGIC
-# MAGIC # Importer des SONAR_FONC de SRC
 # MAGIC import sys
 # MAGIC import os
 # MAGIC
-# MAGIC # 1  Récupérer le chemin absolu du dossier courant (NOTEBOOK)
+# MAGIC #   Récupérer le chemin absolu du dossier courant (NOTEBOOK)
 # MAGIC current_dir = os.getcwd()
 # MAGIC
-# MAGIC # 2 CORRECTION : Remonter d'un niveau (dossier parent) avant d'aller dans SRC
+# MAGIC #  CORRECTION : Remonter d'un niveau (dossier parent) avant d'aller dans SRC
 # MAGIC src_path = os.path.abspath(os.path.join(current_dir, "..", "SRC"))
 # MAGIC
-# MAGIC print("----SRC path -------------", src_path)
 # MAGIC
-# MAGIC # 3 L'ajouter au chemin système
+# MAGIC #  L'ajouter au chemin système
 # MAGIC if src_path not in sys.path:
 # MAGIC     sys.path.append(src_path)
 # MAGIC
-# MAGIC print("SRC Path")
-# MAGIC # Importations des Données oracle
+# MAGIC print("----SRC path -------------")
+# MAGIC print(src_path)
 # MAGIC
-# MAGIC # 4. Importer à partir du  SONAR_FONC_*
+# MAGIC #==================================
+# MAGIC # Importations des Données oracle
+# MAGIC #==================================
+# MAGIC
+# MAGIC # 4. Importer à partir du dossier SRC
 # MAGIC
 # MAGIC from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
 # MAGIC
 # MAGIC
 # MAGIC df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
+# MAGIC
 # MAGIC # Affichage des Dataframes
-# MAGIC print("\n # Affichage des Dataframes")
+# MAGIC print("\n # Affichage des Dataframes, 5 premières Lignes ")
 # MAGIC
-# MAGIC print(df_ab_clients.first())
-# MAGIC print(df_ab_contrats.first())
-# MAGIC print(df_ab_sinistres.first())
-# MAGIC print(df_ab_payments.first())
-# MAGIC
+# MAGIC print(df_ab_clients.show(5))
+# MAGIC print(df_ab_contrats.show(5))
+# MAGIC print(df_ab_sinistres.show(5))
+# MAGIC print(df_ab_payments.show(5))
 # MAGIC
 # MAGIC
 # MAGIC # Protection des données
@@ -111,31 +113,42 @@
 # MAGIC
 # MAGIC df_ab_clients_bronze = protection_bronze(df_ab_clients,"Oracle")
 # MAGIC
-# MAGIC print("/n est ce que df_ab_clients est protégé à la sortie de la SONAR_FONCtion protection_bronze ", df_ab_clients)
-# MAGIC
 # MAGIC  #==================================================
 # MAGIC # PROTECTION ET VERIFIACTION CONTRAT   SINISTRE PAIEMENT
 # MAGIC
-# MAGIC # Affichage des DataFrames pour voir la différence
-# MAGIC print("=== df_ab_clients ===")
-# MAGIC df_ab_clients.show(10, truncate=False)
+# MAGIC # Affichage des DataFrames après le hachage
 # MAGIC print("=== df_ab_clients_protege ===")
-# MAGIC df_ab_clients_bronze.show(10, truncate=False)
+# MAGIC df_ab_clients_bronze.show(5, truncate=False)
 # MAGIC
-# MAGIC
+# MAGIC # Prévoir aussi la protection de ces dataframes
 # MAGIC print("=== df_ab_contrats ===")
-# MAGIC df_ab_contrats.show(10, truncate=False)
+# MAGIC df_ab_contrats.show(5, truncate=False)
 # MAGIC
 # MAGIC print("=== df_ab_sinistres ===")
-# MAGIC df_ab_sinistres.show(10, truncate=False)
+# MAGIC df_ab_sinistres.show(5, truncate=False)
 # MAGIC
 # MAGIC print("=== df_ab_payments ===")
-# MAGIC df_ab_payments.show(10, truncate=False)
+# MAGIC df_ab_payments.show(5, truncate=False)
+# MAGIC
+# MAGIC df_ab_contrats_bronze = df_ab_contrats
+# MAGIC df_ab_sinistres_bronze = df_ab_sinistres
+# MAGIC df_ab_payments_bronze= df_ab_payments
+# MAGIC
+# MAGIC #     ENREGISTREMENT EN BRONZE   DES DONNEES ORACLE    
+# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze 
+# MAGIC
+# MAGIC # Tables Oracles
+# MAGIC enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
+# MAGIC enregistrement_bronze(df_ab_contrats_bronze,"workspace.bronze.oracle_contrats")
+# MAGIC enregistrement_bronze(df_ab_sinistres_bronze,"workspace.bronze.oracle_sinistres")
+# MAGIC enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
 # MAGIC
 # MAGIC
+# MAGIC
+# MAGIC
+# MAGIC #============================================
 # MAGIC # Ingestion des données SQLServer
-# MAGIC
-# MAGIC # Données AssurPlus SQLserver
+# MAGIC #============================================
 # MAGIC
 # MAGIC # Import load_ap_data 
 # MAGIC from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
@@ -161,24 +174,24 @@
 # MAGIC
 # MAGIC # Affichage df_ap_clients_bronze 
 # MAGIC print("=== ASSUREPLUS - Clients ===")
-# MAGIC df_ap_clients_bronze.show(10, truncate=False)
+# MAGIC df_ap_clients_bronze.show(5, truncate=False)
 # MAGIC
 # MAGIC print("=== ASSUREPLUS - Contrats ===")
-# MAGIC df_ap_contrats.show(10, truncate=False)
+# MAGIC df_ap_contrats.show(5, truncate=False)
 # MAGIC
 # MAGIC print("=== ASSUREPLUS - Sinistres ===")
-# MAGIC df_ap_sinistres.show(10, truncate=False)
+# MAGIC df_ap_sinistres.show(5, truncate=False)
 # MAGIC
 # MAGIC print("=== ASSUREPLUS - Payments ===")
-# MAGIC df_ap_payments.show(10, truncate=False)
+# MAGIC df_ap_payments.show(5, truncate=False)
+# MAGIC
+# MAGIC
 # MAGIC
 # MAGIC
 # MAGIC # Enregistrement bronze
 # MAGIC from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
 # MAGIC
-# MAGIC df_ab_contrats_bronze = df_ab_contrats
-# MAGIC df_ab_sinistres_bronze = df_ab_sinistres
-# MAGIC df_ab_payments_bronze= df_ab_payments
+# MAGIC
 # MAGIC
 # MAGIC df_ap_contrats_bronze = df_ap_contrats
 # MAGIC df_ap_sinistres_bronze = df_ap_sinistres
@@ -187,11 +200,6 @@
 # MAGIC #                                   ENREGISTREMENT EN BRONZE        
 # MAGIC # ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
 # MAGIC
-# MAGIC # Tables Oracles
-# MAGIC enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
-# MAGIC enregistrement_bronze(df_ab_contrats_bronze,"workspace.bronze.oracle_contrats")
-# MAGIC enregistrement_bronze(df_ab_sinistres_bronze,"workspace.bronze.oracle_sinistres")
-# MAGIC enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
 # MAGIC
 # MAGIC # Tables SQL Server
 # MAGIC enregistrement_bronze(df_ap_clients_bronze,"workspace.bronze.sqlserver_clients")
@@ -200,8 +208,344 @@
 # MAGIC enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistres")
 # MAGIC
 # MAGIC
+# MAGIC
 # MAGIC #========================================================
 # MAGIC #*****   La couche Silver ****
+# MAGIC
+# MAGIC
+# MAGIC #*************************************************
+# MAGIC # SUPPRESSION LIGNES INCOHERENTES****************
+# MAGIC # *************************************************
+# MAGIC
+# MAGIC
+# MAGIC from SONAR_FONC_SUPPRESSION_INCOHERENCES import suppression_incoherences
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # ============================================================
+# MAGIC #  SUPPRESSION INCOHERENCES  : CONTRATS
+# MAGIC # ============================================================
+# MAGIC
+# MAGIC controles_contrats = [
+# MAGIC
+# MAGIC     # Valeurs obligatoires
+# MAGIC     (
+# MAGIC         F.col("AB_POLICY_NUMBER").isNull() |
+# MAGIC         (F.trim(F.col("AB_POLICY_NUMBER")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_CLIENT_ID").isNull() |
+# MAGIC         (F.col("AB_CLIENT_ID") <= 0),
+# MAGIC         "Identifiant client invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_TYPE_ASSURANCE").isNull() |
+# MAGIC         (~F.col("AB_TYPE_ASSURANCE").isin(
+# MAGIC             "AUTO", "HABITATION", "SANTE",
+# MAGIC             "VIE", "PROFESSIONNELLE", "MOTO"
+# MAGIC         )),
+# MAGIC         "Type assurance invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_STATUT_CONTRAT").isNull() |
+# MAGIC         (~F.col("AB_STATUT_CONTRAT").isin(
+# MAGIC             "ACTIF", "RESILIE", "SUSPENDU",
+# MAGIC             "EN_ATTENTE", "EXPIRE"
+# MAGIC         )),
+# MAGIC         "Statut contrat invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_PRIME_ANNUELLE").isNull() |
+# MAGIC         F.isnan(F.col("AB_PRIME_ANNUELLE")) |
+# MAGIC         (F.col("AB_PRIME_ANNUELLE") < 0),
+# MAGIC         "Prime annuelle invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_AGENCE_ID").isNull() |
+# MAGIC         (F.col("AB_AGENCE_ID") <= 0),
+# MAGIC         "Identifiant agence invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC
+# MAGIC # Contrôle de cohérence entre les dates
+# MAGIC controles_contrats.append((
+# MAGIC     F.col("__date_AB_DATE_FIN") <
+# MAGIC     F.col("__date_AB_DATE_DEBUT"),
+# MAGIC     "Date fin antérieure à date début"
+# MAGIC ))
+# MAGIC
+# MAGIC
+# MAGIC # Exécution sur AB
+# MAGIC df_ab_contrats_clean, df_ab_contrats_rejetes = suppression_incoherences(
+# MAGIC     df_ab_contrats,
+# MAGIC     controles_contrats.copy(),
+# MAGIC     colonnes_dates=["AB_DATE_DEBUT", "AB_DATE_FIN"],
+# MAGIC     cle_primaire="AB_POLICY_NUMBER"
+# MAGIC )
+# MAGIC print(" les contrats valides")
+# MAGIC df_ab_contrats_clean.show()
+# MAGIC print(" les contrats rejetés")
+# MAGIC df_ab_contrats_rejetes.show()
+# MAGIC
+# MAGIC # Contrôles qualité spécifiques aux contrats AssurPlus (schéma AP)
+# MAGIC controles_contrats_ap = [
+# MAGIC
+# MAGIC     # Valeurs obligatoires
+# MAGIC     (
+# MAGIC         F.col("AP_CONTRACT_REF").isNull() |
+# MAGIC         (F.trim(F.col("AP_CONTRACT_REF")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_USER_ID").isNull() |
+# MAGIC         (F.col("AP_USER_ID") <= 0),
+# MAGIC         "Identifiant client invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_PRODUCT_CODE").isNull() |
+# MAGIC         (~F.col("AP_PRODUCT_CODE").isin(
+# MAGIC             "Auto", "Habitation", "Santé",
+# MAGIC             "Prévoyance"
+# MAGIC         )),
+# MAGIC         "Type assurance invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_CONTRACT_STATE").isNull() |
+# MAGIC         (~F.col("AP_CONTRACT_STATE").isin(
+# MAGIC             "ACTIF", "RESILIE", "SUSPENDU",
+# MAGIC             "EN_ATTENTE", "EXPIRE"
+# MAGIC         )),
+# MAGIC         "Statut contrat invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_MONTHLY_PREMIUM").isNull() |
+# MAGIC         F.isnan(F.col("AP_MONTHLY_PREMIUM")) |
+# MAGIC         (F.col("AP_MONTHLY_PREMIUM") < 0),
+# MAGIC         "Prime invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_BROKER_CODE").isNull() |
+# MAGIC         (F.col("AP_BROKER_CODE") <= 0),
+# MAGIC         "Identifiant courtier invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Contrôle de cohérence entre les dates
+# MAGIC     (
+# MAGIC         F.col("__date_AP_END_DATE") <
+# MAGIC         F.col("__date_AP_START_DATE"),
+# MAGIC         "Date fin antérieure à date début"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC # Exécution sur AP
+# MAGIC df_ap_contrats_clean, df_ap_contrats_rejetes = suppression_incoherences(
+# MAGIC     df_ap_contrats,
+# MAGIC     controles_contrats_ap,
+# MAGIC     colonnes_dates=["AP_START_DATE", "AP_END_DATE"],
+# MAGIC     cle_primaire="AP_CONTRACT_REF"
+# MAGIC )
+# MAGIC
+# MAGIC
+# MAGIC # ============================================================
+# MAGIC # SUPPRESSION INCOHERENCES : SINISTRES
+# MAGIC # ============================================================
+# MAGIC
+# MAGIC controles_sinistres_ab = [
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_CLAIM_ID").isNull() |
+# MAGIC         (F.col("AB_CLAIM_ID") <= 0),
+# MAGIC         "Identifiant sinistre invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_POLICY_NUMBER").isNull() |
+# MAGIC         (F.trim(F.col("AB_POLICY_NUMBER")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_MONTANT_ESTIME").isNull() |
+# MAGIC         F.isnan(F.col("AB_MONTANT_ESTIME")) |
+# MAGIC         (F.col("AB_MONTANT_ESTIME") < 0),
+# MAGIC         "Montant estimé invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_STATUT_SINISTRE").isNull() |
+# MAGIC         (~F.col("AB_STATUT_SINISTRE").isin(
+# MAGIC             "OUVERT", "EN_COURS", "CLOTURE",
+# MAGIC             "REFUSE", "EN_EXPERTISE"
+# MAGIC         )),
+# MAGIC         "Statut sinistre invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC controles_sinistres_ap = [
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_SINISTRE_NUM").isNull() |
+# MAGIC         (F.col("AP_SINISTRE_NUM") <= 0),
+# MAGIC         "Identifiant sinistre invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_CONTRACT_REF").isNull() |
+# MAGIC         (F.trim(F.col("AP_CONTRACT_REF")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_ESTIMATED_AMOUNT").isNull() |
+# MAGIC         F.isnan(F.col("AP_ESTIMATED_AMOUNT")) |
+# MAGIC         (F.col("AP_ESTIMATED_AMOUNT") < 0),
+# MAGIC         "Montant estimé invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_CLAIM_STATUS").isNull() |
+# MAGIC         (~F.col("AP_CLAIM_STATUS").isin(
+# MAGIC             "OUVERT", "EN_COURS", "CLOTURE",
+# MAGIC             "REFUSE", "EN_EXPERTISE"
+# MAGIC         )),
+# MAGIC         "Statut sinistre invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Exécution sur AB
+# MAGIC df_ab_sinistres_clean, df_ab_sinistres_rejetes = suppression_incoherences(
+# MAGIC     df_ab_sinistres,
+# MAGIC     controles_sinistres_ab.copy(),
+# MAGIC     colonnes_dates=["AB_DATE_SINISTRE"],
+# MAGIC     cle_primaire="AB_CLAIM_ID",
+# MAGIC     contrats_valides=df_ab_contrats_clean
+# MAGIC )
+# MAGIC
+# MAGIC
+# MAGIC # Exécution sur AP
+# MAGIC df_ap_sinistres_clean, df_ap_sinistres_rejetes = suppression_incoherences(
+# MAGIC     df_ap_sinistres,
+# MAGIC     controles_sinistres_ap.copy(),
+# MAGIC     colonnes_dates=["AP_INCIDENT_DATE"],
+# MAGIC     cle_primaire="AP_SINISTRE_NUM",
+# MAGIC     contrats_valides=df_ap_contrats_clean
+# MAGIC )
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # ============================================================
+# MAGIC #SUPPRESSION INCOHERENCES : PAYMENTS
+# MAGIC # ============================================================
+# MAGIC
+# MAGIC controles_payments_ab = [
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_PAYMENT_ID").isNull() |
+# MAGIC         (F.col("AB_PAYMENT_ID") <= 0),
+# MAGIC         "Identifiant paiement invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_POLICY_NUMBER").isNull() |
+# MAGIC         (F.trim(F.col("AB_POLICY_NUMBER")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_MONTANT").isNull() |
+# MAGIC         F.isnan(F.col("AB_MONTANT")) |
+# MAGIC         (F.col("AB_MONTANT") <= 0),
+# MAGIC         "Montant paiement invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AB_MODE_PAYMENT").isNull() |
+# MAGIC         (~F.col("AB_MODE_PAYMENT").isin(
+# MAGIC             "CARTE", "PRELEVEMENT", "VIREMENT",
+# MAGIC             "CHEQUE", "ESPECES"
+# MAGIC         )),
+# MAGIC         "Mode de paiement invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC controles_payments_ap = [
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_PAYMENT_REF").isNull() |
+# MAGIC         (F.col("AP_PAYMENT_REF") <= 0),
+# MAGIC         "Identifiant paiement invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_CONTRACT_REF").isNull() |
+# MAGIC         (F.trim(F.col("AP_CONTRACT_REF")) == ""),
+# MAGIC         "Numéro de contrat manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_AMOUNT_PAID").isNull() |
+# MAGIC         F.isnan(F.col("AP_AMOUNT_PAID")) |
+# MAGIC         (F.col("AP_AMOUNT_PAID") <= 0),
+# MAGIC         "Montant paiement invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     (
+# MAGIC         F.col("AP_PAYMENT_CHANNEL").isNull() |
+# MAGIC         (~F.col("AP_PAYMENT_CHANNEL").isin(
+# MAGIC             "Carte bancaire", "Prélèvement", "Virement",
+# MAGIC             "Chèque"
+# MAGIC         )),
+# MAGIC         "Mode de paiement invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC # Exécution sur AB
+# MAGIC df_ab_payments_clean, df_ab_payments_rejetes = suppression_incoherences(
+# MAGIC     df_ab_payments,
+# MAGIC     controles_payments_ab.copy(),
+# MAGIC     colonnes_dates=["AB_DATE_PAYMENT"],
+# MAGIC     cle_primaire="AB_PAYMENT_ID",
+# MAGIC     contrats_valides=df_ab_contrats_clean
+# MAGIC )
+# MAGIC
+# MAGIC
+# MAGIC # Exécution sur AP
+# MAGIC df_ap_payments_clean, df_ap_payments_rejetes = suppression_incoherences(
+# MAGIC     df_ap_payments,
+# MAGIC     controles_payments_ap.copy(),
+# MAGIC     colonnes_dates=["AP_PAYMENT_DATETIME"],
+# MAGIC     cle_primaire="AP_PAYMENT_REF",
+# MAGIC     contrats_valides=df_ap_contrats_clean
+# MAGIC )
+# MAGIC
+# MAGIC # aprés suppression des lignes invalides 
+# MAGIC df_ab_contrats = df_ab_contrats_clean
+# MAGIC df_ab_sinistres = df_ab_sinistres_clean
+# MAGIC df_ab_payments = df_ab_payments_clean
+# MAGIC
+# MAGIC df_ap_contrats = df_ap_contrats_clean
+# MAGIC df_ap_sinistres = df_ap_sinistres_clean
+# MAGIC df_ap_payments = df_ap_payments_clean
+# MAGIC
+# MAGIC
 # MAGIC
 # MAGIC from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
 # MAGIC
@@ -238,9 +582,16 @@
 # MAGIC
 # MAGIC # ORACLE
 # MAGIC df_ab_clients =ajoutmétadonnées (df_ab_clients,"Oracle","Oracle_clients.csv","AB_CLIENT_ID")
+# MAGIC df_ab_contrats =ajoutmétadonnées (df_ab_contrats,"Oracle","Oracle_contrats.csv","AB_POLICY_NUMBER")
+# MAGIC df_ab_sinistres =ajoutmétadonnées (df_ab_sinistres,"Oracle","Oracle_sinistres.csv","AB_CLAIM_ID")
+# MAGIC df_ab_payments =ajoutmétadonnées (df_ab_payments,"Oracle","Oracle_payments.csv","AB_PAYMENT_ID")
+# MAGIC
 # MAGIC
 # MAGIC #SQL Server
 # MAGIC df_ap_clients =ajoutmétadonnées (df_ap_clients,"SQL","SQL_clients.csv","AP_USER_ID")
+# MAGIC df_ap_contrats =ajoutmétadonnées (df_ap_contrats,"Oracle","Oracle_contrats.csv","AP_CONTRACT_REF")
+# MAGIC df_ap_sinistres =ajoutmétadonnées (df_ap_sinistres,"Oracle","Oracle_sinistres.csv","AP_SINISTRE_NUM")
+# MAGIC df_ap_payments =ajoutmétadonnées (df_ap_payments,"Oracle","Oracle_payments.csv","AP_PAYMENT_REF")
 # MAGIC
 # MAGIC
 # MAGIC df_ab_clients.show(10, truncate=False)
@@ -310,6 +661,9 @@
 # MAGIC enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients")
 # MAGIC enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats")
 # MAGIC enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres")
+# MAGIC # test 
+# MAGIC enregistrement_silver(df_ab_payments_rejetes,"workspace.silver.oracle_payments_rejetes")
+# MAGIC
 # MAGIC enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments")
 # MAGIC
 # MAGIC # Tables SQL Server

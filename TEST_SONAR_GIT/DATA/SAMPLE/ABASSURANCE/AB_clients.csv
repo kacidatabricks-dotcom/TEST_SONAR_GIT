@@ -1,4 +1,4 @@
-﻿AB_CLIENT_ID,AB_NOM,AB_PRENOM,AB_DATE_NAISSANCE,AB_EMAIL,AB_TELEPHONE,AB_ADRESSE,AB_CODE_POSTAL,AB_NUM_FISCAL,AB_DATE_CREATION,AB_STATUT_CLIENT
+AB_CLIENT_ID,AB_NOM,AB_PRENOM,AB_DATE_NAISSANCE,AB_EMAIL,AB_TELEPHONE,AB_ADRESSE,AB_CODE_POSTAL,AB_NUM_FISCAL,AB_DATE_CREATION,AB_STATUT_CLIENT
 1,Leroy,Paul,1960-08-11,paul.leroy0@example.fr,0697381575,"150 avenue de la République, Lyon",69000,1751936366495,2024-02-21,ACTIF
 2,David,Inès,1958-05-12,inès.david1@example.fr,0625705124,"175 place du Marché, Nantes",44000,4442653842937,2020-09-16,SUSPENDU
 3,Petit,Pierre,1946-08-22,pierre.petit2@example.fr,0695307843,"81 avenue de la République, Blagnac",31700,2936325083434,2024-03-03,ACTIF
@@ -224,7 +224,6 @@
 223,Laurent,Antoine,1991-12-14,antoine.laurent222@example.fr,0664458913,"125 rue Jean Jaurès, Rennes",35000,4279492908923,2011-08-19,PROSPECT
 224,Petit,Amélie,1994-03-04,amélie.petit223@example.fr,0659541298,"13 rue des Écoles, Blagnac",31700,6385746816061,2012-05-23,PROSPECT
 225,Bertrand,Nadia,1996-05-04,nadia.bertrand224@example.fr,0633461564,"109 rue Jean Jaurès, Blagnac",31700,9788973799901,2024-02-06,ACTIF
-226,Lefebvre,Louis,1985-08-05,louis.lefebvre225@example.fr,0688341626,"59 rue Victor Hugo, Lille",59000,1563987602881,2011-02-16,PROSPECT
 227,Thomas,Julie,1981-04-02,julie.thomas226@example.fr,0642958344,"170 avenue de la République, Rennes",35000,1022197799803,2015-01-28,SUSPENDU
 228,Simon,Yanis,1981-10-24,yanis.simon227@example.fr,0620392637,"72 rue des Lilas, Lyon",69000,3116372448230,2010-01-02,PROSPECT
 229,David,Louis,2001-04-01,louis.david228@example.fr,0650800649,"16 avenue de la République, Lille",59000,9147083705822,2018-09-06,INACTIF
@@ -1671,7 +1670,6 @@
 1670,Martin,Nicolas,1950-11-15,nicolas.martin1669@example.fr,0631301533,"22 avenue Pasteur, Bordeaux",33000,4144832965422,2024-01-20,ACTIF
 1671,Vincent,Julie,2005-03-20,julie.vincent1670@example.fr,0676249518,"172 rue Victor Hugo, Bordeaux",33000,2436406127288,2020-10-27,SUSPENDU
 1672,Moreau,Chloé,1967-04-04,chloé.moreau1671@example.fr,0686781157,"42 rue des Lilas, Rennes",35000,7196532854330,2010-10-28,SUSPENDU
-1673,David,Alexandre,2004-09-10,alexandre.david1672@example.fr,0696622988,"140 place du Marché, Paris",75011,3146133987645,2017-11-03,INACTIF
 1674,Durand,Alexandre,1999-03-07,alexandre.durand1673@example.fr,0674912599,"118 rue Victor Hugo, Lyon",69000,8986660361842,2018-11-19,PROSPECT
 1675,David,Camille,1953-02-07,camille.david1674@example.fr,0662823091,"133 rue des Lilas, Bordeaux",33000,5332920968004,2022-02-02,SUSPENDU
 1676,Leroy,Mehdi,1942-01-26,mehdi.leroy1675@example.fr,0687451655,"138 place du Marché, Toulouse",31000,5897491745492,2024-09-20,SUSPENDU
@@ -1914,7 +1912,6 @@
 1913,Garcia,Alexandre,1951-04-04,alexandre.garcia1912@example.fr,0651906945,"155 boulevard Gambetta, Bordeaux",,8900025472609,2017-01-17,PROSPECT
 1914,Simon,Lucas,1961-10-02,lucas.simon1913@example.fr,0669649715,"178 rue des Écoles, Paris",75011,6786594017497,2016-04-16,INACTIF
 1915,Fournier,Camille,1943-09-15,camille.fournier1914@example.fr,0693603210,"63 place du Marché, Bordeaux",33000,5748546761920,2019-03-13,ACTIF
-1916,Durand,Lucas,1953-05-11,lucas.durand1915@example.fr,0693998769,"20 place du Marché, Nantes",44000,2977384973171,2020-09-12,PROSPECT
 1917,Lefebvre,Sarah,1943-05-27,sarah.lefebvre1916@example.fr,0658176769,"147 rue Jean Jaurès, Colomiers",31770,2780141964214,2021-01-10,PROSPECT
 1918,Thomas,Yanis,1971-06-05,yanis.thomas1917@example.fr,0684876886,"86 avenue de la République, Montpellier",34000,9361794456656,2012-03-26,PROSPECT
 1919,Laurent,Camille,1969-04-08,camille.laurent1918@example.fr,0685433855,"150 boulevard Gambetta, Lille",59000,2869718404736,2018-02-20,INACTIF
@@ -2357,7 +2354,6 @@
 2356,Durand,Léa,1972-02-23,léa.durand2355@example.fr,0634189973,"150 boulevard Gambetta, Montpellier",34000,5836287094123,2016-04-02,INACTIF
 2357,Dubois,Chloé,1987-08-27,chloé.dubois2356@example.fr,0649610229,"6 boulevard Gambetta, Colomiers",31770,1650175229258,2025-05-13,SUSPENDU
 2358,Roux,Julie,1951-02-21,julie.roux2357@example.fr,0671650722,"125 avenue Pasteur, Colomiers",31770,5793417718243,2021-08-06,SUSPENDU
-2359,Durand,Sophie,1996-04-18,sophie.durand2358@example.fr,0691750926,"54 place du Marché, Toulouse",,2789876635416,2012-04-22,ACTIF
 2360,Bertrand,Nicolas,1955-06-17,nicolas.bertrand2359@example.fr,0685739638,"118 boulevard Gambetta, Rennes",35000,9831391442698,2012-05-28,ACTIF
 2361,Michel,Léa,2005-12-15,léa.michel2360@example.fr,0668153068,"127 place du Marché, Paris",75011,2831321246337,2012-11-09,INACTIF
 2362,Bertrand,Manon,1962-01-18,manon.bertrand2361@example.fr,0680014382,"128 rue des Lilas, Blagnac",31700,8239671127303,2017-10-04,INACTIF
@@ -2499,7 +2495,6 @@
 2498,Leroy,Camille,1982-10-18,camille.leroy2497@example.fr,0685056535,"152 rue Jean Jaurès, Lyon",69000,2914127573228,2021-08-07,SUSPENDU
 2499,Petit,Louis,1999-11-15,louis.petit2498@example.fr,0698132289,"62 avenue Pasteur, Lyon",69000,1435441599264,2018-01-11,PROSPECT
 2500,Fournier,Julie,2002-09-01,julie.fournier2499@example.fr,0658846330,"90 rue Victor Hugo, Lyon",69000,8676740011502,2012-04-20,PROSPECT
-2501,Lefebvre,Emma,1994-06-01,emma.lefebvre2500@example.fr,0629876670,"139 rue des Lilas, Toulouse",31000,8269014465277,2011-02-09,SUSPENDU
 2502,Robert,Léa,1961-01-20,léa.robert2501@example.fr,0620925836,"49 boulevard Gambetta, Bordeaux",33000,9676155998206,2013-12-14,ACTIF
 2503,Lefebvre,Louis,1945-02-04,louis.lefebvre2502@example.fr,0661542663,"179 rue Victor Hugo, Rennes",35000,7994944460650,2017-11-18,ACTIF
 2504,Petit,Léa,1966-09-10,léa.petit2503@example.fr,0648353697,"12 avenue Pasteur, Toulouse",31000,9692289553311,2021-12-25,INACTIF
