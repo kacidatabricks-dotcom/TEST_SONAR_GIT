@@ -98,21 +98,26 @@
 # MAGIC
 # MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
 # MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
-# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
+# MAGIC      "Adresse_Hached": F.sha2(F.concat(F.col("AB_ADRESSE"), F.lit(salt)), 256),
+# MAGIC      "Telephone_Hached": F.sha2(F.concat(F.col("AB_TELEPHONE"), F.lit(salt)), 256),
+# MAGIC      "Num_fiscal_Hached": F.sha2(F.concat(F.col("AB_NUM_FISCAL"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE","AB_ADRESSE","AB_NUM_FISCAL","AB_TELEPHONE")
 # MAGIC     else: 
 # MAGIC     
 # MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
 # MAGIC      "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
 # MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
 # MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
-# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
+# MAGIC      "Telephone_Hached": F.sha2(F.concat(F.col("AP_PHONE_NUMBER"), F.lit(salt)), 256),
+# MAGIC      "Street_Hached": F.sha2(F.concat(F.col("AP_STREET_ADDRESS"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM","AP_PHONE_NUMBER","AP_STREET_ADDRESS")
 # MAGIC     return df2
 # MAGIC
 # MAGIC # Protection bronze
 # MAGIC
 # MAGIC df_ab_clients_bronze = protection_bronze(df_ab_clients,"Oracle")
 # MAGIC
-# MAGIC  #==================================================
+# MAGIC  #=====================================================
 # MAGIC # PROTECTION ET VERIFIACTION CONTRAT   SINISTRE PAIEMENT
 # MAGIC
 # MAGIC # Affichage des DataFrames après le hachage
@@ -206,8 +211,184 @@
 # MAGIC # *************************************************
 # MAGIC
 # MAGIC
-# MAGIC from SONAR_FONC_SUPPRESSION_INCOHERENCES import suppression_incoherences
+# MAGIC from SONAR_FONC_SUPPRESSION_INCOHERENCES import suppression_incoherences_clients,               suppression_incoherences
 # MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # ====================================================
+# MAGIC # SUPPRESSION INCOHERENCES CLIENTS AbAssurance
+# MAGIC # ====================================================
+# MAGIC
+# MAGIC controles_ab_clients = [
+# MAGIC
+# MAGIC     # Identifiant client
+# MAGIC     (
+# MAGIC         F.col("AB_CLIENT_ID").isNull() |
+# MAGIC         (F.col("AB_CLIENT_ID") <= 0),
+# MAGIC         "Identifiant client invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Nom
+# MAGIC     (
+# MAGIC         F.col("AB_NOM").isNull() |
+# MAGIC         (F.trim(F.col("AB_NOM")) == ""),
+# MAGIC         "Nom client manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Prénom
+# MAGIC     (
+# MAGIC         F.col("AB_PRENOM").isNull() |
+# MAGIC         (F.trim(F.col("AB_PRENOM")) == ""),
+# MAGIC         "Prénom client manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Email : validation uniquement si renseigné
+# MAGIC     (
+# MAGIC         F.col("AB_EMAIL").isNotNull() &
+# MAGIC         (F.trim(F.col("AB_EMAIL")) != "") &
+# MAGIC         (~F.trim(F.col("AB_EMAIL")).rlike(
+# MAGIC             r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+# MAGIC         )),
+# MAGIC         "Adresse email invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Téléphone
+# MAGIC     (
+# MAGIC         F.col("AB_TELEPHONE").isNotNull() &
+# MAGIC         (F.trim(F.col("AB_TELEPHONE")) != "") &
+# MAGIC         (~F.regexp_replace(
+# MAGIC             F.col("AB_TELEPHONE"), r"[\s.-]", ""
+# MAGIC         ).rlike(r"^(0[1-9]\d{8}|\+33[1-9]\d{8}|0033[1-9]\d{8})$")),
+# MAGIC         "Numéro de téléphone invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Code postal
+# MAGIC     (
+# MAGIC         F.col("AB_CODE_POSTAL").isNotNull() &
+# MAGIC         (F.trim(F.col("AB_CODE_POSTAL")) != "") &
+# MAGIC         (~F.col("AB_CODE_POSTAL").rlike(r"^\d{5}$")),
+# MAGIC         "Code postal invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Numéro fiscal
+# MAGIC     (
+# MAGIC         F.col("AB_NUM_FISCAL").isNotNull() &
+# MAGIC         (F.trim(F.col("AB_NUM_FISCAL")) != "") &
+# MAGIC         (~F.col("AB_NUM_FISCAL").rlike(r"^\d{13}$")),
+# MAGIC         "Numéro fiscal invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Adresse
+# MAGIC     (
+# MAGIC         F.col("AB_ADRESSE").isNotNull() &
+# MAGIC         (F.trim(F.col("AB_ADRESSE")) == ""),
+# MAGIC         "Adresse vide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Statut client
+# MAGIC     (
+# MAGIC         F.col("AB_STATUT_CLIENT").isNull() |
+# MAGIC         (F.trim(F.col("AB_STATUT_CLIENT")) == ""),
+# MAGIC         "Statut client manquant"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC
+# MAGIC # Exécution du traitement AB
+# MAGIC df_ab_clients_clean, df_ab_clients_rejetés = suppression_incoherences_clients(
+# MAGIC     df_ab_clients,
+# MAGIC     controles_ab_clients,
+# MAGIC     date_naissance="AB_DATE_NAISSANCE",
+# MAGIC     date_creation="AB_DATE_CREATION",
+# MAGIC     cle_primaire="AB_CLIENT_ID"
+# MAGIC )
+# MAGIC
+# MAGIC df_ab_clients = df_ab_clients_clean
+# MAGIC
+# MAGIC
+# MAGIC # ====================================================
+# MAGIC # SUPPRESSION INCOHERENCES USERS AssurePlus
+# MAGIC # ====================================================
+# MAGIC
+# MAGIC controles_ap_clients = [
+# MAGIC
+# MAGIC     # Identifiant utilisateur
+# MAGIC     (
+# MAGIC         F.col("AP_USER_ID").isNull() |
+# MAGIC         (F.col("AP_USER_ID") <= 0),
+# MAGIC         "Identifiant utilisateur invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Nom complet
+# MAGIC     (
+# MAGIC         F.col("AP_FULL_NAME").isNull() |
+# MAGIC         (F.trim(F.col("AP_FULL_NAME")) == ""),
+# MAGIC         "Nom complet manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Email
+# MAGIC     (
+# MAGIC         F.col("AP_MAIL_ADDRESS").isNotNull() &
+# MAGIC         (F.trim(F.col("AP_MAIL_ADDRESS")) != "") &
+# MAGIC         (~F.trim(F.col("AP_MAIL_ADDRESS")).rlike(
+# MAGIC             r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+# MAGIC         )),
+# MAGIC         "Adresse email invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Téléphone
+# MAGIC     (
+# MAGIC         F.col("AP_PHONE_NUMBER").isNotNull() &
+# MAGIC         (F.trim(F.col("AP_PHONE_NUMBER")) != "") &
+# MAGIC         (~F.regexp_replace(
+# MAGIC             F.col("AP_PHONE_NUMBER"), r"[\s.-]", ""
+# MAGIC         ).rlike(r"^(0[1-9]\d{8}|\+33[1-9]\d{8}|0033[1-9]\d{8})$")),
+# MAGIC         "Numéro de téléphone invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Code postal
+# MAGIC     (
+# MAGIC         F.col("AP_ZIP_CODE").isNotNull() &
+# MAGIC         (F.trim(F.col("AP_ZIP_CODE")) != "") &
+# MAGIC         (~F.col("AP_ZIP_CODE").rlike(r"^\d{5}$")),
+# MAGIC         "Code postal invalide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Adresse
+# MAGIC     (
+# MAGIC         F.col("AP_STREET_ADDRESS").isNotNull() &
+# MAGIC         (F.trim(F.col("AP_STREET_ADDRESS")) == ""),
+# MAGIC         "Adresse vide"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Statut client
+# MAGIC     (
+# MAGIC         F.col("AP_CUSTOMER_STATUS").isNull() |
+# MAGIC         (F.trim(F.col("AP_CUSTOMER_STATUS")) == ""),
+# MAGIC         "Statut client manquant"
+# MAGIC     ),
+# MAGIC
+# MAGIC     # Score fidélité : valeur comprise entre 0 et 100 (try_cast : 'inconnu' -> NULL donc invalide)
+# MAGIC     (
+# MAGIC         F.col("AP_LOYALTY_SCORE").isNull() |
+# MAGIC         F.expr("try_cast(AP_LOYALTY_SCORE as int)").isNull() |
+# MAGIC         (F.expr("try_cast(AP_LOYALTY_SCORE as int)") < 0) |
+# MAGIC         (F.expr("try_cast(AP_LOYALTY_SCORE as int)") > 100),
+# MAGIC         "Score fidélité invalide"
+# MAGIC     )
+# MAGIC ]
+# MAGIC
+# MAGIC
+# MAGIC # Exécution du traitement AP
+# MAGIC df_ap_clients_clean, df_ap_clients_rejetés = suppression_incoherences_clients(
+# MAGIC     df_ap_clients,
+# MAGIC     controles_ap_clients,
+# MAGIC     date_naissance="AP_BIRTH_DATE",
+# MAGIC     date_creation="AP_DATE_CREATION",
+# MAGIC     cle_primaire="AP_USER_ID"
+# MAGIC )
+# MAGIC
+# MAGIC df_ap_clients = df_ap_clients_clean
 # MAGIC
 # MAGIC
 # MAGIC # ============================================================
@@ -282,6 +463,9 @@
 # MAGIC print(" les contrats rejetés")
 # MAGIC df_ab_contrats_rejetes.show(5)
 # MAGIC
+# MAGIC # On ne garde que les enregistrements valides 
+# MAGIC df_ab_contrats= df_ab_contrats_clean
+# MAGIC
 # MAGIC # Detection incohérences  spécifiques aux contrats AssurPlus
 # MAGIC controles_contrats_ap = [
 # MAGIC
@@ -348,6 +532,8 @@
 # MAGIC df_ap_contrats_clean.show(5)
 # MAGIC print(" les contrats rejetés")
 # MAGIC df_ap_contrats_rejetes.show(5)
+# MAGIC # On ne garde que les enregistrements valides 
+# MAGIC df_ap_contrats= df_ap_contrats_clean
 # MAGIC
 # MAGIC
 # MAGIC # ============================================================
@@ -428,11 +614,16 @@
 # MAGIC )
 # MAGIC
 # MAGIC print(" les sinistres valides AbAssurance")
-# MAGIC df_ab_sinistres_clean.show(5)
+# MAGIC df_ab_sinistres_clean.show(5, truncate=False)
 # MAGIC print(" les sinistres rejetés")
-# MAGIC df_ab_sinistres_rejetes.show(5)
+# MAGIC df_ab_sinistres_rejetes.show(5,truncate = False)
 # MAGIC
-# MAGIC # Dtecetion des incohérences (sinistres) relatives à AssurePlus
+# MAGIC   # On ne garde que les enregistrements valides 
+# MAGIC df_ab_sinistres= df_ab_sinistres_clean
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC # Dtection des incohérences (sinistres) relatives à AssurePlus
 # MAGIC df_ap_sinistres_clean, df_ap_sinistres_rejetes = suppression_incoherences(
 # MAGIC     df_ap_sinistres,
 # MAGIC     controles_sinistres_ap.copy(),
@@ -442,9 +633,12 @@
 # MAGIC )
 # MAGIC
 # MAGIC print(" les sinistres valides AssurePlus")
-# MAGIC df_ap_sinistres_clean.show(5)
+# MAGIC df_ap_sinistres_clean.show(5, truncate = False)
 # MAGIC print(" les sinistres rejetés")
-# MAGIC df_ap_sinistres_rejetes.show(5)
+# MAGIC df_ap_sinistres_rejetes.show(5, truncate = False)
+# MAGIC
+# MAGIC # On ne garde que les enregistrements valides 
+# MAGIC df_ap_sinistres= df_ap_sinistres_clean
 # MAGIC
 # MAGIC
 # MAGIC
@@ -524,9 +718,10 @@
 # MAGIC     cle_primaire="AB_PAYMENT_ID",
 # MAGIC     contrats_valides=df_ab_contrats_clean
 # MAGIC )
+# MAGIC # # On ne garde que les enregistrements valides 
+# MAGIC df_ab_payments = df_ab_payments_clean
 # MAGIC
-# MAGIC
-# MAGIC # Exécution sur AP
+# MAGIC # Incohérences Payments AssurePlus
 # MAGIC df_ap_payments_clean, df_ap_payments_rejetes = suppression_incoherences(
 # MAGIC     df_ap_payments,
 # MAGIC     controles_payments_ap.copy(),
@@ -535,23 +730,15 @@
 # MAGIC     contrats_valides=df_ap_contrats_clean
 # MAGIC )
 # MAGIC
-# MAGIC # aprés suppression des lignes invalides 
-# MAGIC df_ab_contrats = df_ab_contrats_clean
-# MAGIC df_ab_sinistres = df_ab_sinistres_clean
-# MAGIC df_ab_payments = df_ab_payments_clean
-# MAGIC
-# MAGIC df_ap_contrats = df_ap_contrats_clean
-# MAGIC df_ap_sinistres = df_ap_sinistres_clean
+# MAGIC # On ne garde que les enregistrements valides 
 # MAGIC df_ap_payments = df_ap_payments_clean
 # MAGIC
 # MAGIC
 # MAGIC
-# MAGIC from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
+# MAGIC #from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
 # MAGIC
 # MAGIC # Protection des données por la couche Silver
 # MAGIC def protection_silver(df2, source):
-# MAGIC     
-# MAGIC
 # MAGIC     salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
 # MAGIC     
 # MAGIC     if source == "Oracle":
@@ -561,16 +748,22 @@
 # MAGIC
 # MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AB_NOM"), F.lit(salt)), 256),
 # MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AB_PRENOM"), F.lit(salt)), 256),
-# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE")
-# MAGIC      return df2
+# MAGIC      "Adresse_Hached": F.sha2(F.concat(F.col("AB_ADRESSE"), F.lit(salt)), 256),
+# MAGIC      "Telephone_Hached": F.sha2(F.concat(F.col("AB_TELEPHONE"), F.lit(salt)), 256),
+# MAGIC      "Num_fiscal_Hached": F.sha2(F.concat(F.col("AB_NUM_FISCAL"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AB_DATE_NAISSANCE"), F.lit(salt)), 256)}).drop("AB_NOM", "AB_PRENOM","AB_EMAIL","AB_DATE_NAISSANCE","AB_ADRESSE","AB_NUM_FISCAL","AB_TELEPHONE")
 # MAGIC     else: 
 # MAGIC     
 # MAGIC      df2 = df2.withColumns({"Email_Hached": F.sha2(F.concat(F.col("AP_MAIL_ADDRESS"), F.lit(salt)), 256),
 # MAGIC      "FULL_NAME_Hached": F.sha2(F.concat(F.col("AP_FULL_NAME"), F.lit(salt)), 256),
 # MAGIC      "Nom_Hached": F.sha2(F.concat(F.col("AP_NOM"), F.lit(salt)), 256),
 # MAGIC      "Prenom_Hached": F.sha2(F.concat(F.col("AP_PRENOM"), F.lit(salt)), 256),
-# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM")
-# MAGIC      return df2
+# MAGIC      "Telephone_Hached": F.sha2(F.concat(F.col("AP_PHONE_NUMBER"), F.lit(salt)), 256),
+# MAGIC      "Street_Hached": F.sha2(F.concat(F.col("AP_STREET_ADDRESS"), F.lit(salt)), 256),
+# MAGIC      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM","AP_PHONE_NUMBER","AP_STREET_ADDRESS")
+# MAGIC     return df2
+# MAGIC
+# MAGIC     
 # MAGIC
 # MAGIC
 # MAGIC # Ajout des données pour avoir la trace
@@ -588,9 +781,9 @@
 # MAGIC
 # MAGIC #SQL Server
 # MAGIC df_ap_clients =ajoutmétadonnées (df_ap_clients,"SQL","SQL_clients.csv","AP_USER_ID")
-# MAGIC df_ap_contrats =ajoutmétadonnées (df_ap_contrats,"Oracle","Oracle_contrats.csv","AP_CONTRACT_REF")
-# MAGIC df_ap_sinistres =ajoutmétadonnées (df_ap_sinistres,"Oracle","Oracle_sinistres.csv","AP_SINISTRE_NUM")
-# MAGIC df_ap_payments =ajoutmétadonnées (df_ap_payments,"Oracle","Oracle_payments.csv","AP_PAYMENT_REF")
+# MAGIC df_ap_contrats =ajoutmétadonnées (df_ap_contrats,"SQL","SQL_contrats.csv","AP_CONTRACT_REF")
+# MAGIC df_ap_sinistres =ajoutmétadonnées (df_ap_sinistres,"SQL","SQL_sinistres.csv","AP_SINISTRE_NUM")
+# MAGIC df_ap_payments =ajoutmétadonnées (df_ap_payments,"SQL","SQL_payments.csv","AP_PAYMENT_REF")
 # MAGIC
 # MAGIC
 # MAGIC df_ab_clients.show(10, truncate=False)
@@ -629,7 +822,7 @@
 # MAGIC """
 # MAGIC
 # MAGIC # Nettoyage des données
-# MAGIC #========================  AJOUTER            CONTRAT SINISTRE ET PAYMENTS
+# MAGIC #========================  AJOUTER            CONTRAT SINISTRE ET PAYMENTS dat cleaning 
 # MAGIC
 # MAGIC from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import data_cleaning
 # MAGIC
@@ -660,16 +853,27 @@
 # MAGIC enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients")
 # MAGIC enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats")
 # MAGIC enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres")
-# MAGIC # test 
-# MAGIC enregistrement_silver(df_ab_payments_rejetes,"workspace.silver.oracle_payments_rejetes")
-# MAGIC
 # MAGIC enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments")
+# MAGIC
+# MAGIC # Conservation des élements rejetés pour une analyse ultérieure
+# MAGIC
+# MAGIC enregistrement_silver(df_ab_clients_silver,"workspace.silver.oracle_clients_rejetés")
+# MAGIC enregistrement_silver(df_ab_contrats_silver,"workspace.silver.oracle_contrats_rejetés")
+# MAGIC enregistrement_silver(df_ab_sinistres_silver,"workspace.silver.oracle_sinistres_rejetés")
+# MAGIC enregistrement_silver(df_ab_payments_silver,"workspace.silver.oracle_payments_rejetés")
 # MAGIC
 # MAGIC # Tables SQL Server
 # MAGIC enregistrement_silver(df_ap_clients_silver,"workspace.silver.sqlserver_clients")
 # MAGIC enregistrement_silver(df_ap_contrats_silver,"workspace.silver.sqlserver_contrats")
 # MAGIC enregistrement_silver(df_ap_payments_silver,"workspace.silver.sqlserver_payments")
 # MAGIC enregistrement_silver(df_ap_sinistres_silver,"workspace.silver.sqlserver_sinistres")
+# MAGIC
+# MAGIC # Conservation des élements rejetés pour une analyse ultérieure
+# MAGIC
+# MAGIC enregistrement_silver(df_ap_clients_silver,"workspace.silver.sqlserver_clients_rejetés")
+# MAGIC enregistrement_silver(df_ap_contrats_silver,"workspace.silver.sqlserver_contrats_rejetés")
+# MAGIC enregistrement_silver(df_ap_payments_silver,"workspace.silver.sqlserver_payments_rejetés")
+# MAGIC enregistrement_silver(df_ap_sinistres_silver,"workspace.silver.sqlserver_sinistres_rejetés")
 # MAGIC
 # MAGIC
 # MAGIC #####   ICI NORMALEMENT COMMENCE LA COUCHE GOLD ###################################
@@ -680,15 +884,15 @@
 # MAGIC
 # MAGIC
 # MAGIC dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
-# MAGIC print("dim_clients")
-# MAGIC dim_clients.show(truncate = False)
+# MAGIC print("dim_clients les 20 premiers clients clients finaux")
+# MAGIC dim_clients.show(20)
 # MAGIC
 # MAGIC
 # MAGIC # Étape 3 : Matrice de Doublons et Création de la Dimension Client
 # MAGIC
 # MAGIC from SONAR_FONC_MATRICE_DOUBLONS import generer_matrice_doublons
 # MAGIC
-# MAGIC # Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance ou Téléphone)
+# MAGIC # Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance )
 # MAGIC from pyspark.sql.window import Window
 # MAGIC from pyspark.sql.functions import dense_rank, upper, initcap
 # MAGIC
@@ -699,8 +903,8 @@
 # MAGIC # res_matched, res_dim, res_doublons, res_df = generer_Matrice_Doublons(dim_clients)     ceci marche 
 # MAGIC matched_clients, dim_clients, doublons_df,result_df =generer_matrice_doublons(dim_clients)
 # MAGIC
-# MAGIC print("Matrice des doublons")
-# MAGIC display(dim_clients.join(doublons_df, "MASTER_CLIENT_ID"))
+# MAGIC print("Matrice des 20 premiers doublons")  #   A REVOIR
+# MAGIC dim_clients.join(doublons_df, "MASTER_CLIENT_ID").show(20)
 # MAGIC
 # MAGIC # Protection GOLD
 # MAGIC
@@ -724,7 +928,7 @@
 # MAGIC dim_clients_protege= protection_gold(dim_clients)
 # MAGIC #dim_clients_gold = dim_clients_protege.drop("NOM","DATE_NAISSANCE","PRENOM")
 # MAGIC dim_clients_gold = dim_clients_protege
-# MAGIC display(dim_clients_gold.join(doublons_df, "MASTER_CLIENT_ID"))
+# MAGIC dim_clients_gold.join(doublons_df, "MASTER_CLIENT_ID").show(20, truncate = False)
 # MAGIC
 # MAGIC # Enregistrment GOLD Client
 # MAGIC
@@ -762,6 +966,7 @@
 # MAGIC
 # MAGIC fact_payments_gold_mapped = unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, table_name="workspace.gold.fact_payments") # changer le nom de la table
 # MAGIC
+# MAGIC #  IL FAUT RAJOUTER PROTECTION des contrats sinistres et payùents
 # MAGIC
 # MAGIC
 # MAGIC #Dossier 3 (Suite) : SONAR_TESTs unitaires, Qualité & Dashboards

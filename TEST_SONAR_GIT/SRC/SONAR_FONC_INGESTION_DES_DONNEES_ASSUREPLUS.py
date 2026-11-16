@@ -167,11 +167,38 @@ def load_ap_data(spark):
     ]
 # création des DataFrames
 
+     df_ap_clients = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Clients.csv")) # NOSONAR
+
+     df_ap_contrats = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Contrats.csv")) # NOSONAR
+     # Rendre le montant de la prime annuelle comme dans AB Assurance
+     df_ap_contrats = df_ap_contrats.withColumn("AP_MONTHLY_PREMIUM",round(col("AP_MONTHLY_PREMIUM").cast("double")*12,2))
+
+
+     df_ap_sinistres = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Sinistres.csv")) # NOSONAR
+
+     df_ap_payments = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Payments.csv")) # NOSONAR
+     '''
      df_ap_clients = spark.createDataFrame(ap_clients_data, schema=ap_clients_schema)
      df_ap_contrats = spark.createDataFrame(ap_contrats_data, schema=ap_contrats_schema)
      df_ap_sinistres = spark.createDataFrame(ap_sinistres_data, schema=ap_sinistres_schema)
      df_ap_payments = spark.createDataFrame(ap_payments_data, schema=ap_payments_schema)
-
+     '''
     
      # ⚡ ACTION FORCÉE : On oblige Spark à analyser les données maintenant
      df_ap_clients.first() 
