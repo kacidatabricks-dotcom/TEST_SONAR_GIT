@@ -55,11 +55,11 @@ def generer_matrice_doublons(df_clients):
         .filter(col("NB_OCCURENCES") > 1)
 
      result_df = dim_clients.join(doublons_df, "MASTER_CLIENT_ID")
-     matched_clients.first() 
-     dim_clients.first()
+    # matched_clients.first() 141126
+     #dim_clients.first() 141126
      #doublons_df.first()
-     result_df.first()    
-     print("Création maatrice doublons  réussie.")
+     #result_df.first()  141126  
+     print("Création matrice doublons  réussie.")
 
      return   matched_clients, dim_clients, doublons_df,result_df
     except Exception as e:

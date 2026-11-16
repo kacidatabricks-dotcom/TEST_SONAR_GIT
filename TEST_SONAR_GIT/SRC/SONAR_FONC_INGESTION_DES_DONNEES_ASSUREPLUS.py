@@ -9,7 +9,7 @@ from datetime import datetime
 from pyspark.sql.window import Window
 
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
-
+from pathlib import Path
 
 # Initialisation Spark
 # spark = SparkSession.builder.appName("AssurePlusData").getOrCreate()  supprimé parès conseil de chat
@@ -39,7 +39,16 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 
 
 
-def load_ap_data(spark):
+def load_ap_data(spark,data_dir=None):
+    if data_dir is None:
+        data_dir = (
+            Path(__file__).resolve().parents[1]
+            / "DATA"
+            / "SAMPLE"
+            / "APASSURANCE"
+        ).as_uri()
+
+    data_dir = data_dir.rstrip("/")
     df_ap_clients= None
     df_ap_contrats = None
     df_ap_sinistres = None
@@ -167,11 +176,42 @@ def load_ap_data(spark):
     ]
 # création des DataFrames
 
+     df_ap_clients = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+         #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Clients.csv")) # NOSONAR
+         .load(f"{data_dir}/Clients.csv"))
+
+     df_ap_contrats = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Contrats.csv")) # NOSONAR
+        .load(f"{data_dir}/Contrats.csv"))
+     # Rendre le montant de la prime annuelle comme dans AB Assurance
+     df_ap_contrats = df_ap_contrats.withColumn("AP_MONTHLY_PREMIUM",round(col("AP_MONTHLY_PREMIUM").cast("double")*12,2))
+
+
+     df_ap_sinistres = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true") 
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Sinistres.csv")) # NOSONAR
+        .load(f"{data_dir}/Sinistres.csv"))
+
+     df_ap_payments = (
+        spark.read.format("csv")
+        .option("header", True)
+        .option("inferSchema", "true")
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/APASSURANCE/Payments.csv")) # NOSONAR
+       .load(f"{data_dir}/Payments.csv"))
+     '''
      df_ap_clients = spark.createDataFrame(ap_clients_data, schema=ap_clients_schema)
      df_ap_contrats = spark.createDataFrame(ap_contrats_data, schema=ap_contrats_schema)
      df_ap_sinistres = spark.createDataFrame(ap_sinistres_data, schema=ap_sinistres_schema)
      df_ap_payments = spark.createDataFrame(ap_payments_data, schema=ap_payments_schema)
-
+     '''
     
      # ⚡ ACTION FORCÉE : On oblige Spark à analyser les données maintenant
      df_ap_clients.first() 

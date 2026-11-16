@@ -59,12 +59,21 @@ from pyspark.sql.window import Window
 
 
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
-
+from pathlib import Path
 # Initialisation Spark
 # spark = SparkSession.builder.appName("AssuranceData").getOrCreate()  supprimée parès le conseil de chat
 
 
-def create_ab_dataframes(spark):
+def create_ab_dataframes(spark,data_dir=None):
+    if data_dir is None:
+         data_dir = (
+            Path(__file__).resolve().parents[1]
+            / "DATA"
+            / "SAMPLE"
+            / "ABASSURANCE"
+        ).as_uri()
+
+    data_dir = data_dir.rstrip("/")
     df_ab_clients= None
     df_ab_contrats = None
     df_ab_sinistres = None
@@ -179,31 +188,38 @@ def create_ab_dataframes(spark):
         
         # création des dataframes
 
+        # Schéma explicite (défini plus haut) : avec inferSchema, AB_TELEPHONE est converti
+        # en entier (le 0 initial est perdu) et le contrôle téléphonique en Silver rejette
+        # quasiment tous les clients -> MASTER_CLIENT_ID null dans les tables Gold.
         df_ab_clients = (
         spark.read.format("csv")
         .option("header", True)
         .schema(ab_clients_schema)
-         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_clients.csv"))
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/clients.csv")) # NOSONAR
+        .load(f"{data_dir}/clients.csv"))
 
         df_ab_contrats = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_contrats.csv"))
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/contrats.csv")) # NOSONAR
+        .load(f"{data_dir}/contrats.csv"))
 
-        df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
+        # df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
 
         df_ab_sinistres = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_sinistres.csv"))
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/sinistres.csv")) # NOSONAR
+        .load(f"{data_dir}/sinistres.csv"))
 
         df_ab_payments = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_payments.csv"))
+        #.load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/payments.csv")) # NOSONAR
+        .load(f"{data_dir}/payments.csv"))
 
         print("Création des Ab dataframes")
         #df_ab_clients = spark.createDataFrame(ab_clients_data, schema=ab_clients_schema)
@@ -260,4 +276,12 @@ print("=== df_ab_payments ===")
 df_ab_payments.show(10, truncate=False)
 
 """
+
+
+import os
+
+# Chemin relatif depuis l'emplacement du notebook dans le dépôt Git
+file_path = os.path.join("DATA", "SAMPLE", "ABASSURANCE", "clients.csv")
+df = spark.read.option("header", "true").csv(f"file:{os.path.abspath(file_path)}")
+
 

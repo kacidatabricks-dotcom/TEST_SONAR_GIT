@@ -110,14 +110,27 @@ def data_cleaning(df1, df2):
 
 #appliquée à Oracle
  df1= normalize_date(df1,"AB_DATE_NAISSANCE")
- # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
- df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
+ # Date de création : les CSV contiennent des dates seules ("2024-02-21").
+  # Avec le seul format "yyyy-MM-dd HH:mm:ss", try_to_timestamp retourne NULL ->
+  # DATE_CREATION 100 % null en Silver puis en Gold.
+  # Coalesce : accepte date+heure OU date seule.
+  # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df1= df1.withColumn("AB_DATE_CREATION",
+   F.coalesce(
+       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
+       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd"))
+     ))
  
 
 #appliquée à SQL Server
  df2= normalize_date(df2,"AP_BIRTH_DATE")
- #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
- df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
+ # Même correction que AB_DATE_CREATION : dates seules dans le CSV AP.
+  #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df2= df2.withColumn("AP_DATE_CREATION",
+   F.coalesce(
+       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
+       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd"))
+     ))
 
 
 # Appliquer la fonction aux colonnes de téléphone
