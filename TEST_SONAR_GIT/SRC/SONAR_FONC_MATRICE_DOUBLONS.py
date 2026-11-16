@@ -59,7 +59,7 @@ def generer_matrice_doublons(df_clients):
      #dim_clients.first() 141126
      #doublons_df.first()
      #result_df.first()  141126  
-     print("Création maatrice doublons  réussie.")
+     print("Création matrice doublons  réussie.")
 
      return   matched_clients, dim_clients, doublons_df,result_df
     except Exception as e:
