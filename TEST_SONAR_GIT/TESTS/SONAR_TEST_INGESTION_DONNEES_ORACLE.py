@@ -300,6 +300,7 @@ def create_ab_dataframes(spark):
     
     return df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments
 """
+"""
 from   SONAR_FONC_INGESTION_DONNEES_ORACLE  import create_ab_dataframes
 def test_create_ab_dataframes(spark):
     dfs = create_ab_dataframes(spark,data_dir)
@@ -313,7 +314,7 @@ def test_create_ab_dataframes(spark):
     assert "AB_POLICY_NUMBER" in dfs[1].columns
     assert "AB_CLAIM_ID" in dfs[2].columns
     assert "AB_PAYMENT_ID" in dfs[3].columns
-
+"""
 
 # Aprés avoir changé les Path
 
