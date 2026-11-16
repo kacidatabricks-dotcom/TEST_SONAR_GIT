@@ -314,3 +314,39 @@ def test_create_ab_dataframes(spark):
     assert "AB_CLAIM_ID" in dfs[2].columns
     assert "AB_PAYMENT_ID" in dfs[3].columns
 
+
+# Aprés avoir changé les Path
+
+from pathlib import Path
+
+from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+DATA_DIR = (
+    PROJECT_ROOT
+    / "DATA"
+    / "SAMPLE"
+    / "ABASSURANCE"
+).as_uri()
+
+
+def test_create_ab_dataframes(spark):
+    dfs = create_ab_dataframes(spark, DATA_DIR)
+
+    # Vérification des DataFrames créés
+    assert dfs[0].count() == 10
+    assert dfs[1].count() == 10
+    assert dfs[2].count() == 10
+    assert dfs[3].count() == 10
+
+    # Vérification des colonnes clés
+    assert "AB_CLIENT_ID" in dfs[0].columns
+    assert "AB_POLICY_NUMBER" in dfs[1].columns
+    assert "AB_CLAIM_ID" in dfs[2].columns
+    assert "AB_PAYMENT_ID" in dfs[3].columns
+
+
+
+
