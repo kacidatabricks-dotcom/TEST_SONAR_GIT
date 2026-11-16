@@ -179,31 +179,34 @@ def create_ab_dataframes(spark):
         
         # création des dataframes
 
+        # Schéma explicite (défini plus haut) : avec inferSchema, AB_TELEPHONE est converti
+        # en entier (le 0 initial est perdu) et le contrôle téléphonique en Silver rejette
+        # quasiment tous les clients -> MASTER_CLIENT_ID null dans les tables Gold.
         df_ab_clients = (
         spark.read.format("csv")
         .option("header", True)
         .schema(ab_clients_schema)
-         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_clients.csv"))
+         .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/clients.csv")) # NOSONAR
 
         df_ab_contrats = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_contrats.csv"))
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/contrats.csv")) # NOSONAR
 
-        df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
+        # df_ab_contrats = df_ab_contrats.withColumn("AB_PRIME_ANNUELLE",round(col("AB_PRIME_ANNUELLE").cast("double")/12,2))
 
         df_ab_sinistres = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_sinistres.csv"))
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/sinistres.csv")) # NOSONAR
 
         df_ab_payments = (
         spark.read.format("csv")
         .option("header", True)
         .option("inferSchema", "true")
-        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/AB_payments.csv"))
+        .load("/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/DATA/SAMPLE/ABASSURANCE/payments.csv")) # NOSONAR
 
         print("Création des Ab dataframes")
         #df_ab_clients = spark.createDataFrame(ab_clients_data, schema=ab_clients_schema)

@@ -2,12 +2,13 @@
 
 
 from pyspark.sql import functions as F
+from pyspark.sql.functions import expr
 
 # 1. Définition des fonctions
 def ajoutmétadonnées(df, source_system, source_file, client_id_col):
     df.first()
     try:
-     print("ajout de métadonnées en cours...")   
+     print("ajout de métadonnées en cours...", source_system)  
 
      print("ajout des métadonnées")
      return df \

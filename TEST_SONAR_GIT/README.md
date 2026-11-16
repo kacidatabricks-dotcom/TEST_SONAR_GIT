@@ -69,3 +69,17 @@ En production, la couche d'ingestion pourra être remplacée par JDBC/CDC sans c
 
 Les noms et types du modèle cible sont une proposition de normalisation pédagogique à partir des deux schémas fournis dans l'énoncé.
 Les règles métier de rapprochement doivent être validées par le client avant une fusion automatique des personnes.
+## Execution du Notebook
+### Principe
+- Se connecter à DATABRICKS avec les identifiants fournis dans le PDF du Bloc 3.
+![README](./Image 1.png).
+- Cliquer sur Workspace
+- Cliquer sur Users, puis sur kacidatabricks@gmail.com
+- Choisir le projet : TEST_SONAR_GIT
+- Cliquer encore sur TEST_SONAR_GIT
+- Cliquer sur NOTEBOOKS
+- Puis sur: Notbook_Projet_Big_Data_Assurance
+
+Le Notebook est constitué de plusieurs cellules.
+### Exécution concrête
+il faut réescuter toutes les cellules à chaque passe.
