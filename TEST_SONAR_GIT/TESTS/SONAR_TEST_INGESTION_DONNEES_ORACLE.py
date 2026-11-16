@@ -314,7 +314,7 @@ def test_create_ab_dataframes(spark):
     assert "AB_POLICY_NUMBER" in dfs[1].columns
     assert "AB_CLAIM_ID" in dfs[2].columns
     assert "AB_PAYMENT_ID" in dfs[3].columns
-"""
+"""   
 
 # Aprés avoir changé les Path
 
