@@ -14,38 +14,11 @@ import re
 
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType, TimestampType, DoubleType
 from pyspark.sql import functions as F
-"""
-
-Schéma client final :
-
-MASTER_CLIENT_ID
-SOURCE_SYSTEM
-SOURCE_CLIENT_ID
-NOM
-PRENOM
-NOM_COMPLET
-DATE_NAISSANCE
-EMAIL
-TELEPHONE
-ADRESSE
-CODE_POSTAL
-NUMERO_FISCAL
-DATE_CREATION
-STATUT_CLIENT
-SCORE_FIDELITE
-DATE_INTEGRATION
-SOURCE_FILE
-INGESTION_TIMESTAMP
-VILLE     je ne l'ai pas rajouté
-
-"""
-
-
 
 
 
 # Nettoyage des noms 
-#from pyspark.sql import functions as F
+
 def clean_last_name(df,last_name_col):
   df = df.withColumn(
   last_name_col,
@@ -70,15 +43,14 @@ def normalize_date (df,col_name):
   df= df.withColumn(col_name, F.try_to_date(col(col_name), "yyyy-MM-dd"))    # j'ai mis try_to_date au lieu de to_date
   return df 
 
-# Nettoyage des numéros de Téléphone mais rajouter +33 
-
+# Nettoyage des numéros de Téléphone
 
 # Correction de la fonction normalize_phone_number (format international)
 def normalize_phone_number(df, column_name):
     # Supprime tout sauf les chiffres et applique le format français
     return df.withColumn(column_name, concat(lit("+33"), regexp_replace(regexp_replace(col(column_name), r'[^0-9]', ''), r'^0', '') ))
 
-# -------------------     NETTOYAGE  -------------------------------
+# -------------------    Fonction  NETTOYAGE  -------------------------------
 def data_cleaning(df1, df2):
 
 
@@ -110,14 +82,27 @@ def data_cleaning(df1, df2):
 
 #appliquée à Oracle
  df1= normalize_date(df1,"AB_DATE_NAISSANCE")
- # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
- df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
+ # Date de création : les CSV contiennent des dates seules ("2024-02-21").
+  # Avec le seul format "yyyy-MM-dd HH:mm:ss", try_to_timestamp retourne NULL ->
+  # DATE_CREATION 100 % null en Silver puis en Gold.
+  # Coalesce : accepte date+heure OU date seule.
+  # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df1= df1.withColumn("AB_DATE_CREATION",
+   F.coalesce(
+       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
+       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd"))
+     ))
  
 
 #appliquée à SQL Server
  df2= normalize_date(df2,"AP_BIRTH_DATE")
- #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
- df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")))
+ # Même correction que AB_DATE_CREATION : dates seules dans le CSV AP.
+  #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
+ df2= df2.withColumn("AP_DATE_CREATION",
+   F.coalesce(
+       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
+       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd"))
+     ))
 
 
 # Appliquer la fonction aux colonnes de téléphone

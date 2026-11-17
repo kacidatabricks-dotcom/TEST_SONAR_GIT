@@ -1,31 +1,3 @@
-"""
-# Étape 3 : Matrice de Doublons et Création de la Dimension Client
-
-# Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance ou Téléphone)
-from pyspark.sql.window import Window
-from pyspark.sql.functions import dense_rank, upper, initcap
-
-# Génération d'une clé de rapprochement
-matched_clients = df_clients.withColumn(
-    "MATCH_KEY", 
-    concat_ws("_", col("NOM"), col("PRENOM"), col("DATE_NAISSANCE"))
-)
-
-# Attribution d'un ID Master Unique pour les doublons
-windowSpec = Window.orderBy("MATCH_KEY")
-dim_client = matched_clients.withColumn("MASTER_CLIENT_ID", dense_rank().over(windowSpec))
-
-
-# Affichage de la Matrice de Doublons
-print("--- MATRICE DE DOUBLONS IDENTIFIÉS ---")
-doublons_df = dim_client.groupBy("MASTER_CLIENT_ID") \
-    .agg(count("ORIGINAL_ID").alias("NB_OCCURENCES")) \
-    .filter(col("NB_OCCURENCES") > 1)
-
-display(dim_client.join(doublons_df, "MASTER_CLIENT_ID"))
-"""
-
-
 
 def generer_matrice_doublons(df_clients):
     from pyspark.sql.window import Window
@@ -45,20 +17,16 @@ def generer_matrice_doublons(df_clients):
     )
 # Attribution d'un ID Master Unique pour les doublons
      windowSpec = Window.orderBy("MATCH_KEY")
-     #dim_clients = matched_clients.withColumn("MASTER_CLIENT_ID", dense_rank().over(windowSpec))
      dim_clients = matched_clients.withColumn("MASTER_CLIENT_ID", dense_rank().over(windowSpec)).localCheckpoint()
 
-# Affichage de la matrice de doublons
+# Dtermination de la matrice de doublons
 
      doublons_df = dim_clients.groupBy("MASTER_CLIENT_ID") \
         .agg(count("ORIGINAL_ID").alias("NB_OCCURENCES")) \
         .filter(col("NB_OCCURENCES") > 1)
 
      result_df = dim_clients.join(doublons_df, "MASTER_CLIENT_ID")
-     matched_clients.first() 
-     dim_clients.first()
-     #doublons_df.first()
-     result_df.first()    
+    
      print("Création maatrice doublons  réussie.")
 
      return   matched_clients, dim_clients, doublons_df,result_df

@@ -1,7 +1,7 @@
 from pyspark.sql.functions import *
 
 
-#-----       Ma fonction de unify et map 
+#-----        Unify  and  map Sinistres
 
 def unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold, table_name="gold.fact_sinistres"):
 
@@ -36,11 +36,11 @@ def unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold
     "STATUT_SINISTRE"
  )
 
- fact_sinistres_gold_mapped.show(truncate=False)
+ # fact_sinistres_gold_mapped.show(truncate=False)
 
  fact_sinistres_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name + "_mapped")
 
- return fact_sinistres_gold
+ return fact_sinistres_gold_mapped
 
 
 

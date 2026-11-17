@@ -1,7 +1,7 @@
 from pyspark.sql.functions import *
 
 
-
+# Unification Payments
 
 def unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, table_name="gold.fact_payments"):
 
@@ -25,7 +25,7 @@ def unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, t
     )
  )
 
- fact_payments_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name)
+ #fact_payments_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name)
 
 
 # Mapping des payments avec la dim_clients pour obtenir MASTER_CLIENT_ID
@@ -43,7 +43,7 @@ def unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold, t
     "MODE_PAYMENT"
  )
 
- fact_payments_gold_mapped.show(truncate=False)
+ # fact_payments_gold_mapped.show(truncate=False)
 
  fact_payments_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(table_name + "_mapped")
 
