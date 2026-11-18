@@ -1,3 +1,4 @@
+Ce texte n'est pas définitif, voir l'expliaction dans le PDF du BLOC 3
 # AbAssurance / AssurePlus — Bloc 3
 ## Solution pédagogique 100 % Databricks Free Edition + Python/PySpark + GitHub
 
