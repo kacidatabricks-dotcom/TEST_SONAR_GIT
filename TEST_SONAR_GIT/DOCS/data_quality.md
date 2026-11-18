@@ -1,3 +1,4 @@
+A finir ce n'est pas le texte définitif!
 # Data Quality
 
 ## Règles proposées

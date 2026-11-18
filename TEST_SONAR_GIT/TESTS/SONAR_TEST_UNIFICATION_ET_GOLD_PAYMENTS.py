@@ -1,45 +1,4 @@
-"""
-# Unification payments
-
-fact_payment_gold = df_ab_payments.select(
-    col("AB_PAYMENT_ID").cast("string").alias("PAYMENT_ID"),
-    col("AB_POLICY_NUMBER").cast("string").alias("POLICY_NUMBER"),
-    col("AB_DATE_PAYMENT").alias("DATE_PAYMENT"),
-    col("AB_MONTANT").alias("MONTANT"),
-    col("AB_MODE_PAYMENT").alias("MODE_PAYMENT")
-).union(
-    df_ap_payments.select(
-    col("AP_PAYMENT_REF").cast("string").alias("PAYMENT_ID"),
-    col("AP_CONTRACT_REF").cast("string").alias("POLICY_NUMBER"),
-    col("AP_PAYMENT_DATETIME").alias("DATE_PAYMENT"),
-    col("AP_AMOUNT_PAID").alias("MONTANT"),
-    col("AP_PAYMENT_CHANNEL").alias("MODE_PAYMENT")
-    )
-)
-
-fact_payment_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.fact_payment")
-
-
-
-def unify_payments(df_ab_payments, df_ap_payments, output_table="gold.fact_payment"):
-    fact_payment_gold = df_ab_payments.select(
-        col("AB_PAYMENT_ID").cast("string").alias("PAYMENT_ID"),
-        col("AB_POLICY_NUMBER").cast("string").alias("POLICY_NUMBER"),
-        col("AB_DATE_PAYMENT").alias("DATE_PAYMENT"),
-        col("AB_MONTANT").alias("MONTANT"),
-        col("AB_MODE_PAYMENT").alias("MODE_PAYMENT")
-    ).union(
-        df_ap_payments.select(
-            col("AP_PAYMENT_REF").cast("string").alias("PAYMENT_ID"),
-            col("AP_CONTRACT_REF").cast("string").alias("POLICY_NUMBER"),
-            col("AP_PAYMENT_DATETIME").alias("DATE_PAYMENT"),
-            col("AP_AMOUNT_PAID").alias("MONTANT"),
-            col("AP_PAYMENT_CHANNEL").alias("MODE_PAYMENT")
-        )
-    )
-    fact_payment_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(output_table)
-    return fact_payment_gold
-"""
+# Test unification payments
 
 from SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT import unify_and_map_payments
 def test_unify_payments():

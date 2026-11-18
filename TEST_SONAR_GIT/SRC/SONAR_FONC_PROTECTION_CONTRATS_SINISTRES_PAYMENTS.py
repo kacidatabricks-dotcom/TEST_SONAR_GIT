@@ -1,13 +1,23 @@
+<<<<<<< HEAD
+#
+
+# Non 
+=======
 # Protection des données CONTRATS / SINISTRES / PAIEMENTS 
 
 # Non pertinent
+>>>>>>> origin/Develop
 
 
 
     # ==============================================
     # ==============================================
 
+<<<<<<< HEAD
+"""
+=======
 
+>>>>>>> origin/Develop
     # Protection des données
 def protection_bronze(df2, source):
     
@@ -35,6 +45,10 @@ def protection_bronze(df2, source):
      "Date_de_naissance_Hached": F.sha2(F.concat(F.col("AP_BIRTH_DATE"), F.lit(salt)), 256)}).drop("AP_FULL_NAME","AP_MAIL_ADDRESS","AP_BIRTH_DATE","AP_NOM", "AP_PRENOM","AP_PHONE_NUMBER","AP_STREET_ADDRESS")
     return df2
 
+<<<<<<< HEAD
+"""
+=======
 
+>>>>>>> origin/Develop
 
 

@@ -1,6 +1,5 @@
 # Enregistrment GOLD Client
 # fait dans le programme principal
-#dim_clients.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold.dim_clients")
 
 def save_dim_clients_to_gold(df,TableName):
     try:
@@ -13,4 +12,3 @@ def save_dim_clients_to_gold(df,TableName):
         print(f"Fin du traitement pour la table {TableName}")
 
 
-# "gold.dim_clients" ici que se fait la sauvegarde du gold client

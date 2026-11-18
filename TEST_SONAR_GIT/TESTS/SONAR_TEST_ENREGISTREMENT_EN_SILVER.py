@@ -1,24 +1,6 @@
 from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
-"""
-#                                   ENREGISTREMENT EN SILVER        
-# ATTENTION: Toutes les tables ne sont pas enregistrées dans la base de données delta
-def enregistrement_silver(df,tablename):
 
- df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(tablename)
 
-# Tables Oracles
-enregistrement_silver(df_ab_clients,"silver.oracle_clients")
-enregistrement_silver(df_ab_contrats,"silver.oracle_contrats")
-enregistrement_silver(df_ab_sinistres,"silver.oracle_sinistres")
-enregistrement_silver(df_ab_payments,"silver.oracle_payments")
-
-# Tables SQL Server
-enregistrement_silver(df_ap_clients,"silver.sqlserver_clients")
-enregistrement_silver(df_ap_contrats,"silver.sqlserver_contrats")
-enregistrement_silver(df_ap_payments,"silver.sqlserver_payments")
-enregistrement_silver(df_ap_sinistres,"silver.sqlserver_sinistres")
-
-"""
 def test_enregistrement_silver():
     from pyspark.sql.types import StructType, StructField, StringType, IntegerType
     sample_schema = StructType([
