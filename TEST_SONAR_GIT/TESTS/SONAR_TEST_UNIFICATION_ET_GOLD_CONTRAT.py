@@ -28,7 +28,11 @@ def test_unify_and_map_contrats():
     assert rows["P123"].TYPE_CONTRAT == "AUTO"
     assert rows["C456"].TYPE_CONTRAT == "HOME"
     
+<<<<<<< HEAD
 #tahc test client absent
+=======
+#test_unify_and_map_contrats()  supprimé suite au conseil chatg
+>>>>>>> origin/Develop
 
 
 def test_unify_and_map_contrats_client_absent():

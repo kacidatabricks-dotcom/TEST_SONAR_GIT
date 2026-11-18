@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 # **************************************************************************
 # Tests du module SONAR_FONC_SUPPRESSION_INCOHERENCES
 # (suppression_incoherences_clients  et  suppression_incoherences générique)
+=======
+# ============================================================================
+# Tests du module SONAR_FONC_SUPPRESSION_INCOHERENCES
+# (suppression_incoherences_clients + suppression_incoherences générique)
+>>>>>>> origin/Develop
 # ============================================================================
 from SONAR_FONC_SUPPRESSION_INCOHERENCES import (
     suppression_incoherences,
