@@ -2,7 +2,8 @@
     
 from unittest.mock import MagicMock
 
-from SONAR_FONC_GOLD_CLIENT import save_dim_clients_to_gold
+import importlib
+save_dim_clients_to_gold = importlib.import_module("sonar-fonc-gold-client").save_dim_clients_to_gold
 
 
 def test_save_dim_client_to_gold():

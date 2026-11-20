@@ -1,4 +1,5 @@
-from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
+import importlib
+unify_and_map_contrats = importlib.import_module("sonar-fonc-unification-et-gold-contrat").unify_and_map_contrats
 
 def test_unify_and_map_contrats():
     # Création des DataFrames de test
@@ -28,11 +29,7 @@ def test_unify_and_map_contrats():
     assert rows["P123"].TYPE_CONTRAT == "AUTO"
     assert rows["C456"].TYPE_CONTRAT == "HOME"
     
-<<<<<<< HEAD
-#tahc test client absent
-=======
 #test_unify_and_map_contrats()  supprimé suite au conseil chatg
->>>>>>> origin/Develop
 
 
 def test_unify_and_map_contrats_client_absent():

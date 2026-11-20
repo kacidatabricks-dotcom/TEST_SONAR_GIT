@@ -2,7 +2,9 @@
 
 from pyspark.sql import functions as F
 
-from SONAR_FONC_GARDER_LA_TRACE import ajoutmétadonnées
+import importlib
+ajoutmétadonnées = importlib.import_module("sonar-fonc-garder-la-trace").ajoutmétadonnées
+
 def test_ajoutmétadonnées():
     test_data = [("123",), ("456",)]
     columns = ["AB_CLIENT_ID"]

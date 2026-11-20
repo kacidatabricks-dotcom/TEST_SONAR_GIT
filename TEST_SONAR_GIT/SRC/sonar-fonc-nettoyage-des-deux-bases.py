@@ -47,8 +47,19 @@ def normalize_date (df,col_name):
 
 # Correction de la fonction normalize_phone_number (format international)
 def normalize_phone_number(df, column_name):
-    # Supprime tout sauf les chiffres et applique le format français
-    return df.withColumn(column_name, concat(lit("+33"), regexp_replace(regexp_replace(col(column_name), r'[^0-9]', ''), r'^0', '') ))
+    # Normalise au format international français : +33 suivi de 9 chiffres.
+    # Accepte en entrée : 0X..., +33X..., 0033X... (espaces/points/tirets ignorés).
+    # Une valeur non reconnaissable est laissée inchangée (contrôles qualité en amont).
+    # Piège corrigé : l'ancienne version collait "+33" devant les chiffres sans
+    # retirer un éventuel préfixe déjà présent (+336... -> +33336..., rejeté ensuite
+    # par la regex ^\+33[1-9]\d{8}$).
+    chiffres = F.regexp_replace(F.col(column_name), r'[^0-9]', '')
+    return df.withColumn(
+        column_name,
+        F.when(chiffres.rlike(r'^0[1-9]\d{8}$'), F.concat(F.lit("+33"), chiffres.substr(2, 9)))
+         .when(chiffres.rlike(r'^0033[1-9]\d{8}$'), F.concat(F.lit("+33"), chiffres.substr(5, 9)))
+         .when(chiffres.rlike(r'^33[1-9]\d{8}$'), F.concat(F.lit("+33"), chiffres.substr(3, 9)))
+         .otherwise(F.col(column_name)))
 
 # -------------------    Fonction  NETTOYAGE  -------------------------------
 def data_cleaning(df1, df2):

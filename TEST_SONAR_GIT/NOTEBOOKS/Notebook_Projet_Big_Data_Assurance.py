@@ -62,7 +62,8 @@ print(src_path)
 
 # Importer à partir du dossier SRC
 
-from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
+import importlib
+create_ab_dataframes = importlib.import_module("sonar-fonc-ingestion-des-donnees-oracle").create_ab_dataframes
 
 
 df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
@@ -126,7 +127,7 @@ df_ab_sinistres_bronze = df_ab_sinistres
 df_ab_payments_bronze= df_ab_payments
 
 #     ENREGISTREMENT EN BRONZE   DES DONNEES ORACLE    
-from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze 
+enregistrement_bronze = importlib.import_module("sonar-fonc-enregistrement-en-bronze").enregistrement_bronze 
 
 # Tables Oracles
 enregistrement_bronze(df_ab_clients_bronze,"workspace.bronze.oracle_clients")
@@ -140,7 +141,7 @@ enregistrement_bronze(df_ab_payments_bronze,"workspace.bronze.oracle_payments")
 #============================================
 
 # Import load_ap_data 
-from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
+load_ap_data = importlib.import_module("sonar-fonc-ingestion-des-donnees-assureplus").load_ap_data
 
 # Obtention des dataframes
 df_ap_clients, df_ap_contrats, df_ap_sinistres, df_ap_payments = load_ap_data(spark)
@@ -210,7 +211,10 @@ if src_path not in sys.path:
 # SUPPRESSION LIGNES INCOHERENTES : les lignes qui présentent des incohérences
 # *****************************************************************************
 
-from SONAR_FONC_SUPPRESSION_INCOHERENCES import suppression_incoherences_clients, suppression_incoherences           
+import importlib
+_mod = importlib.import_module("sonar-fonc-suppression-incoherences")
+suppression_incoherences_clients = _mod.suppression_incoherences_clients
+suppression_incoherences = _mod.suppression_incoherences           
 
 
 
@@ -715,8 +719,7 @@ controles_payments_ap = [
     (
         F.col("AP_PAYMENT_CHANNEL").isNull() |
         (~F.col("AP_PAYMENT_CHANNEL").isin(
-            "Carte bancaire", "Prélèvement", "Virement",
-            "Chèque"
+            "CARD", "CASH", "BANK_TRANSFER", "DIRECT_DEBIT", "CHEQUE"
         )),
         "Mode de paiement invalide"
     )
@@ -791,7 +794,8 @@ def protection_silver(df2, source):
 # Ajout des données (SOURCE_SYSTEM, ORIGINAl_ID) pour avoir la trace des sources de provenance (AbAssurance ou AssurePlus)
 
 
-from SONAR_FONC_GARDER_LA_TRACE import ajoutmétadonnées
+_mod = importlib.import_module("sonar-fonc-garder-la-trace")
+ajoutmétadonnées = _mod.ajoutmétadonnées
 
 
 # ORACLE
@@ -811,11 +815,13 @@ df_ap_payments =ajoutmétadonnées (df_ap_payments,"SQL","SQL_payments.csv","AP_
 # Nettoyage et normalisation des données des deux bases
 
 
-from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import data_cleaning
+_mod = importlib.import_module("sonar-fonc-nettoyage-des-deux-bases")
+data_cleaning = _mod.data_cleaning
 
 df_ab_clients, df_ap_clients= data_cleaning(df_ab_clients,df_ap_clients)
  
-from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
+_mod = importlib.import_module("sonar-fonc-enregistrement-en-silver")
+enregistrement_silver = _mod.enregistrement_silver
 
 
 #************           ENREGISTREMENT EN SILVER      ****************  
@@ -869,7 +875,10 @@ enregistrement_silver(df_ap_sinistres_Rejected,"workspace.silver.sqlserver_sinis
 
 
 
-from SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
+# Import dynamique : le nom du module contient des tirets -> import classique impossible
+import importlib
+_mod = importlib.import_module("sonar-fonc-harmonisation-et-unification-clients")
+harmonize_clients = _mod.harmonize_clients
 
 # Mapping et unification des clients
 dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
@@ -879,7 +888,8 @@ print(dim_clients.show(5))
 
 #  Matrice de Doublons et Création de la Dimension Client
 
-from SONAR_FONC_MATRICE_DOUBLONS import generer_matrice_doublons
+_mod = importlib.import_module("sonar-fonc-matrice-doublons")
+generer_matrice_doublons = _mod.generer_matrice_doublons
 
 # Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance )
 from pyspark.sql.window import Window
@@ -926,7 +936,8 @@ dim_clients_gold.write.format("delta").mode("overwrite").option("overwriteSchema
 
 # Traitements  Tables des Faits Contrats,  Sinistres et payments, Couche Gold
 
-from SONAR_FONC_UNIFICATION_ET_GOLD_CONTRAT import unify_and_map_contrats
+_mod = importlib.import_module("sonar-fonc-unification-et-gold-contrat")
+unify_and_map_contrats = _mod.unify_and_map_contrats
 
 # Unification Contrats
 
@@ -941,7 +952,8 @@ print(fact_contrats_gold.show(5,truncate= False))
 
 # Unification Sinistres
 
-from  SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE   import unify_and_map_sinistres
+_mod = importlib.import_module("sonar-fonc-unification-et-gold-sinistre")
+unify_and_map_sinistres = _mod.unify_and_map_sinistres
 
 fact_sinistres_gold = unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold) 
 
@@ -951,7 +963,8 @@ print(fact_sinistres_gold.show(5,truncate= False))
 
 # Unification payments
 
-from  SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT   import unify_and_map_payments
+_mod = importlib.import_module("sonar-fonc-unification-et-gold-payment")
+unify_and_map_payments = _mod.unify_and_map_payments
 
 fact_payments_gold_mapped = unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold)
 
@@ -990,6 +1003,11 @@ if src_path not in sys.path:
 if test_path not in sys.path:
    sys.path.append(test_path)
 
+# Dossier des CSV AbAssurance — même valeur que le défaut des modules d'ingestion
+# (<racine du dépôt>/DATA/SAMPLE/ABASSURANCE). Les fonctions de test appellent
+# create_ab_dataframes(spark, data_dir) avec ce nom, il doit exister dans le namespace.
+data_dir = os.path.join(os.path.dirname(src_path), "DATA", "SAMPLE", "ABASSURANCE")
+
 
 
 # On initialise et on démarre TOUT DE SUITE le coverage, avant tout import !
@@ -1005,14 +1023,20 @@ import importlib
 
 print("Importation des modules (SRC) sous surveillance de coverage...")
 for module_info in pkgutil.iter_modules([src_path]):
-    # Ignorer les fichiers non importables comme modules (ex. "__init__.py.py" -> nom "__init__.py" invalide)
-    if not module_info.name.isidentifier():
+    # Les modules SRC portent des noms avec tirets ("sonar-fonc-...") : ce ne sont pas
+    # des identifiants Python valides pour "import x", MAIS importlib.import_module
+    # les accepte. On ne saute que les fichiers non modules (ex. "__init__.py.py").
+    if "." in module_info.name or module_info.name.startswith("_"):
         continue
     # Charge le fichier proprement en tant que module Python valide
     # reload : recharge le module s'il est déjà en mémoire, pour prendre en compte les modifications du fichier
-    module = importlib.import_module(module_info.name)
-    module = importlib.reload(module)
-    
+    try:
+        module = importlib.import_module(module_info.name)
+        module = importlib.reload(module)
+    except Exception as e:
+        print(f"ATTENTION : import SRC impossible pour {module_info.name} : {e}")
+        continue
+
     # Injecte les fonctions dans l'espace global pour que les  tests unittest les trouvent
     module_attrs = [attr for attr in dir(module) if not attr.startswith('_')]
     for attr in module_attrs:
@@ -1023,9 +1047,9 @@ for module_info in pkgutil.iter_modules([src_path]):
 import glob
 
 print("Chargement des fichiers de tests (TESTS)...")
-test_files = sorted(glob.glob(os.path.join(test_path, "SONAR_TEST_*.py")))
+test_files = sorted(glob.glob(os.path.join(test_path, "sonar-test-*.py")))
 # Les fichiers d'ingestion en premier : ils créent df_ab_* utilisés par les autres tests
-ingestion_files = [f for f in test_files if "INGESTION" in os.path.basename(f)]
+ingestion_files = [f for f in test_files if "ingestion" in os.path.basename(f)]
 other_files = [f for f in test_files if f not in ingestion_files]
 
 for f in ingestion_files + other_files:
@@ -1106,7 +1130,7 @@ class TestETLPipeline(unittest.TestCase):
 ##
 
     def test1_create_ab_dataframes(self):
-        test_create_ab_dataframes()
+        test_create_ab_dataframes(spark)
 
     #test_load_ap_data()
     def test1_load_ap_data(self):
@@ -1185,4 +1209,3 @@ cov.save()
 
 print("\n ------- RAPPORT DE COUVERTURE ----")
 cov.report(ignore_errors=True)
-

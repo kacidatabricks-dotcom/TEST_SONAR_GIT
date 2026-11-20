@@ -1,4 +1,5 @@
-from SONAR_FONC_HARMONISATION_ET_UNIFICATION_CLIENTS import harmonize_clients
+import importlib
+harmonize_clients = importlib.import_module("sonar-fonc-harmonisation-et-unification-clients").harmonize_clients
 # 
 
 def test_harmonize_clients(spark):

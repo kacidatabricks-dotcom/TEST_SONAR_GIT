@@ -1,4 +1,5 @@
-from SONAR_FONC_ENREGISTREMENT_EN_SILVER import enregistrement_silver
+import importlib
+enregistrement_silver = importlib.import_module("sonar-fonc-enregistrement-en-silver").enregistrement_silver
 
 
 def test_enregistrement_silver():
