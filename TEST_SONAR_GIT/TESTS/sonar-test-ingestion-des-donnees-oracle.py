@@ -1,6 +1,7 @@
 
 
-from   SONAR_FONC_INGESTION_DONNEES_ORACLE  import create_ab_dataframes
+import importlib
+create_ab_dataframes = importlib.import_module("sonar-fonc-ingestion-des-donnees-oracle").create_ab_dataframes
 def test_create_ab_dataframes(spark):
     dfs = create_ab_dataframes(spark,data_dir)
     # Vérification des DataFrames créés

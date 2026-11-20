@@ -1,4 +1,5 @@
-from SONAR_FONC_ENREGISTREMENT_EN_BRONZE import enregistrement_bronze
+import importlib
+enregistrement_bronze = importlib.import_module("sonar-fonc-enregistrement-en-bronze").enregistrement_bronze
 
 def test_enregistrement_bronze():
     # Création d'un DataFrame de test

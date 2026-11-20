@@ -1,6 +1,7 @@
 # Test unification payments
 
-from SONAR_FONC_UNIFICATION_ET_GOLD_PAYMENT import unify_and_map_payments
+import importlib
+unify_and_map_payments = importlib.import_module("sonar-fonc-unification-et-gold-payment").unify_and_map_payments
 def test_unify_payments():
     # Création de dataframes de test
     ab_data = [

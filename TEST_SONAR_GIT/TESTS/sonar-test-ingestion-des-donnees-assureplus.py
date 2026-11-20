@@ -1,5 +1,6 @@
 
-from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
+import importlib
+load_ap_data = importlib.import_module("sonar-fonc-ingestion-des-donnees-assureplus").load_ap_data
 def test_load_ap_data(spark):
     df_clients, df_contrats, df_sinistres, df_payments = load_ap_data(spark,data_dir)
     assert df_clients.count() == 10

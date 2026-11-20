@@ -1,10 +1,17 @@
 
 #test_nettoiage_des_deux_bases(df_clients)
 
-from SONAR_FONC_NETTOYAGE_DES_DEUX_BASES import clean_last_name, normalize_firstname, normalize_email, normalize_date, normalize_phone_number, data_cleaning
+import importlib
+_mod = importlib.import_module("sonar-fonc-nettoyage-des-deux-bases")
+clean_last_name = _mod.clean_last_name
+normalize_firstname = _mod.normalize_firstname
+normalize_email = _mod.normalize_email
+normalize_date = _mod.normalize_date
+normalize_phone_number = _mod.normalize_phone_number
+data_cleaning = _mod.data_cleaning
 
-from SONAR_FONC_INGESTION_DONNEES_ORACLE import create_ab_dataframes
-from SONAR_FONC_INGESTION_DES_DONNEES_ASSUREPLUS import load_ap_data
+create_ab_dataframes = importlib.import_module("sonar-fonc-ingestion-des-donnees-oracle").create_ab_dataframes
+load_ap_data = importlib.import_module("sonar-fonc-ingestion-des-donnees-assureplus").load_ap_data
 from pyspark.sql import Row
 
 def test_nettoyage_des_deux_bases():

@@ -1,6 +1,7 @@
 # test unifysinistres
 
-from SONAR_FONC_UNIFICATION_ET_GOLD_SINISTRE import unify_and_map_sinistres
+import importlib
+unify_and_map_sinistres = importlib.import_module("sonar-fonc-unification-et-gold-sinistre").unify_and_map_sinistres
 def test_unify_sinistres():
     from pyspark.sql import Row
     test_ab = spark.createDataFrame([Row(AB_CLAIM_ID="1", AB_POLICY_NUMBER="A", AB_MONTANT_ESTIME=100, AB_STATUT_SINISTRE="Ouvert")])
