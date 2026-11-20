@@ -134,54 +134,7 @@ Le principe est de comparer les informations disponibles dans les deux bases et 
 
 Pour ma première version, je n'utilise pas le score de similarité. je m'appuie sur sur une match ky qui concatène le nom, le prénom et la data de naissance. La probabilité de détecter de vrais doublons est très élevée.
 
-
-
-## 6. Organisation du dépôt
-
-Proposition d'organisation des fichiers du projet :
-
-```text
-big-data-assurance/
-│
-├── README.md
-│
-├── data/
-│   ├── raw/
-│   │   ├── abassurance/
-│   │   └── assureplus/
-│   │
-│   └── samples/
-│       ├── clients_abassurance.csv
-│       ├── clients_assureplus.csv
-│       └── contrats.csv
-│
-├── notebooks/
-│   ├── 01_ingestion_bronze.py
-│   ├── 02_nettoyage_silver.py
-│   ├── 03_normalisation.py
-│   ├── 04_deduplication.py
-│   ├── 05_matching_clients.py
-│   ├── 06_consolidation_gold.py
-│   └── 07_controle_qualite.py
-│
-├── sql/
-│   ├── creation_tables.sql
-│   └── analyses_metier.sql
-│
-├── documentation/
-│   ├── architecture.md
-│   ├── dictionnaire_donnees.md
-│   └── regles_gestion.md
-│
-└── tests/
-    ├── test_nettoyage.py
-    ├── test_matching.py
-    └── test_qualite.py
-```
-
-Cette organisation est une proposition : les notebooks peuvent être développés directement dans l'espace de travail Databricks, puis exportés dans le dépôt Git.
-
-## 7. Étapes de réalisation
+## 6. Étapes de réalisation
 
 Le projet est organisé selon une démarche Agile, avec des développements progressifs.
 
@@ -225,7 +178,7 @@ Le projet est organisé selon une démarche Agile, avec des développements prog
 - Contrôler les volumes traités.
 - Vérifier la cohérence des résultats.
 
-## 8. Gestion Agile du projet
+## 7. Gestion Agile du projet
 
 Le projet suit une organisation Agile basée sur des sprints et des User Stories.
 
@@ -248,7 +201,7 @@ En cas de désaccord entre développeurs :
 - Réaliser un Spike technique si nécessaire.
 - Réestimer collectivement la charge.
 
-## 9. Lancement du projet sur Databricks Free Edition
+## 8. Lancement du projet sur Databricks Free Edition
 
 ### Prérequis
 
@@ -302,7 +255,7 @@ display(df_clean)
 
 Cet exemple suppose que les colonnes `nom`, `prenom` et `email` existent dans le fichier source.
 
-## 10. Sécurité et qualité des données
+## 9. Sécurité et qualité des données
 
 Les données d'assurance peuvent contenir des informations personnelles. Le projet doit donc respecter les principes de protection des données personnelles, notamment le RGPD.
 
@@ -314,7 +267,7 @@ Mesures recommandées :
 - Contrôler la qualité et la traçabilité des traitements.
 - Documenter les règles de transformation.
 
-## 11. Résultats attendus
+## 10. Résultats attendus
 
 À la fin du projet, la plateforme devra permettre :
 
@@ -326,7 +279,7 @@ Mesures recommandées :
 - De produire un référentiel client consolidé.
 - De fournir des données fiables pour les analyses métier.
 
-## 12. Limites de Databricks Free Edition
+## 11. Limites de Databricks Free Edition
 
 Databricks Free Edition est utilisé dans ce projet pour des raisons pédagogiques et de démonstration.
 
@@ -339,7 +292,7 @@ Il convient de prendre en compte :
 
 Pour un projet réel traitant plusieurs millions d'enregistrements, il sera nécessaire d'évaluer les ressources, les performances, la sécurité et les coûts d'une architecture Databricks adaptée à la production.
 
-## 13. Conclusion
+## 12. Conclusion
 
 Ce projet permet de mettre en pratique les principales étapes d'un projet Big Data dans le secteur de l'assurance : ingestion, transformation, nettoyage, rapprochement et consolidation des données.
 
