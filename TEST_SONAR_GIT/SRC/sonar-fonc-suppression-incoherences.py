@@ -139,7 +139,8 @@ def suppression_incoherences(
         df_temp = df_temp.withColumn(
             f"__date_{colonne}",
             F.expr(
-                f"try_to_timestamp(`{colonne}`, 'yyyy-MM-dd')"
+                f"coalesce(try_to_timestamp(`{colonne}`, 'yyyy-MM-dd'), "
+                f"try_to_timestamp(`{colonne}`, 'yyyy-MM-dd HH:mm:ss'))"
             )
         )
 

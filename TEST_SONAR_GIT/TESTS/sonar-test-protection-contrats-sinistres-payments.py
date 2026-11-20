@@ -1,16 +1,16 @@
 # ============================================================================
 # Tests du module SONAR_FONC_PROTECTION_CONTRATS_SINISTRES_PAYMENTS (protection_bronze)
 # ============================================================================
-<<<<<<< HEAD
 
-=======
+#=======
 # NB : ce module n'importe pas F/dbutils dans son propre fichier ; il s'appuie sur
 # le namespace du notebook. On injecte donc F et dbutils dans son namespace avant
 # de tester, puis on appelle la fonction via la référence du module.
->>>>>>> origin/Develop
+
 import hashlib
 
-import SONAR_FONC_PROTECTION_CONTRATS_SINISTRES_PAYMENTS as _protection_module
+import importlib
+_protection_module = importlib.import_module("sonar-fonc-protection-contrats-sinistres-payments")
 from pyspark.sql import functions as F
 
 

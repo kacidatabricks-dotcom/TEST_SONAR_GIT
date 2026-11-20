@@ -5,3 +5,5 @@ htmlcov/
 .venv/
 *.pyc
 .DS_Store
+# Sauvegardes locales créées pendant les réparations de données (jamais versionnées)
+*_BACKUP*.csv

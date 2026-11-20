@@ -42,13 +42,8 @@ def harmonize_clients(df_ab_clients, df_ap_clients):
     )
         df_clients = std_df_ab_clients.union(std_df_ap_clients)
         df_clients.createOrReplaceTempView("raw_unified_clients")
-<<<<<<< HEAD
-        print("Liste des 10 premiers clients après unification AB et AP")
-        df_clients.show(10,truncate= False)
-=======
         print("Liste des 20 premiers clients après unification AB et AP")
         df_clients.show(20,truncate= False)
->>>>>>> origin/Develop
         print("unification des clients réussie")
 
         return df_clients

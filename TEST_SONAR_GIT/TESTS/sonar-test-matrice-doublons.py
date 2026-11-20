@@ -3,7 +3,8 @@
 # Algorithme d'identification des doublons (Matching exact sur Nom, Prénom, Date de Naissance ou Téléphone)
 from pyspark.sql.window import Window
 from pyspark.sql.functions import dense_rank, upper, initcap
-from SONAR_FONC_MATRICE_DOUBLONS import generer_matrice_doublons
+import importlib
+generer_matrice_doublons = importlib.import_module("sonar-fonc-matrice-doublons").generer_matrice_doublons
 
 def test_generer_matrice_doublons():
     from pyspark.sql import Row
