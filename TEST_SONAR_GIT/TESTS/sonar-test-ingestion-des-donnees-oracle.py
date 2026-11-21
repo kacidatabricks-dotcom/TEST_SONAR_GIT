@@ -3,7 +3,8 @@
 import importlib
 create_ab_dataframes = importlib.import_module("sonar-fonc-ingestion-des-donnees-oracle").create_ab_dataframes
 def test_create_ab_dataframes(spark):
-    dfs = create_ab_dataframes(spark,data_dir)
+    # Sans data_dir, la fonction retombe sur DATA/SAMPLE/ABASSURANCE du dépôt
+    dfs = create_ab_dataframes(spark)
     # Vérification des DataFrames créés
     # (l'ingestion lit désormais les CSV réels de DATA/SAMPLE/ABASSURANCE,
     #  pas les 10 lignes d'exemple historiques : on vérifie qu'ils sont non vides)
