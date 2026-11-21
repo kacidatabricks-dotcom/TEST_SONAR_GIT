@@ -12,7 +12,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 
 from pathlib import Path
 # Initialisation Spark
-# spark = SparkSession.builder.appName("AssuranceData").getOrCreate()  supprimée parès le conseil de chat
+# spark = SparkSession.builder.appName("AssuranceData").getOrCreate()  supprimée car crée automatiquement
 
 
 
@@ -99,8 +99,8 @@ def create_ab_dataframes(spark,data_dir=None):
          
 
         # # NOSONAR
-        .load(f"{data_dir}/clients5.csv"))
-         # pour générer une erreur d'ingestion , je mets clients5 (au lieu de clients), qui n'existe pas 
+        .load(f"{data_dir}/clients.csv"))
+         # pour générer une erreur d'ingestion, je mets clients5 (au lieu de clients),qui n'existe pas 
 
         df_ab_contrats = (
         spark.read.format("csv")
