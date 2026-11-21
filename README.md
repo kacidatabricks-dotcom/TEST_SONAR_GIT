@@ -132,7 +132,7 @@ Le rapprochement peut s'appuyer sur plusieurs critères :
 
 Le principe est de comparer les informations disponibles dans les deux bases et de calculer un score de similarité.
 
-Pour ma première version, je n'utilise pas le score de similarité. je m'appuie sur sur une match ky qui concatène le nom, le prénom et la data de naissance. La probabilité de détecter de vrais doublons est très élevée.
+Pour ma première version, je n'utilise pas le score de similarité. je m'appuie sur sur une match key qui concatène le nom, le prénom et la date de naissance. La probabilité de détecter de vrais doublons est très élevée.
 
 ## 6. Étapes de réalisation
 
@@ -186,10 +186,10 @@ Exemples de User Stories :
 
 | ID | User Story | Priorité |
 |---|---|---|
-| US-01 | En tant que data Engineer, je veux importer les données Oracle d'AbAssurance afin de les rendre disponibles dans la plateforme analytique unifiée | Haute |
-| US-02 | En tant que data Engineer, je veux importer les données SQL Server d'AssurePlus afin de les intégrer au pipeline. | Haute |
-| US-03 | En tant que data Engineer, je veux normaliser les noms, Emails, téléphones, adresses, dates… afin de faciliter le rapprochement. | Haute |
-| US-04 | En tant que Responsable des Sinistres, je veux un Dashboard pour suivre les sinistres (fréquence, coût moyen, délai de traitement). | Haute |
+| us-01 |en-tant-que-data-ngineer-je-veux-importer-les -donnees-oracle-d-abassurance-afin-de-les-rendre-disponibles-dans-la-plateforme-analytique-unifiée | Haute |
+| us-02 |en-tant-que-data-ngineer-je-veux-importer-les-donnees-qlserver-d-assureplus-ssureplus-afin-de-les-integrer-au-pipeline. | Haute |
+| us-03 | en-tant-que-data-ngineer-je-veux-normaliser-les-noms-prenoms-date-de-naissance-telephone-afin-de-faciliter-le-rapprochement. | Haute |
+| us-04 |en-tant-que-responsable-des-sinistres-je-veux-un dashboard-pour-suivre-les-sinistres-(frequence,coût moyen, delai-de-traitement). | Haute |
 
 
 Les estimations de complexité peuvent être réalisées collectivement avec la méthode Planning Poker.
