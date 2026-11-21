@@ -40,7 +40,10 @@ def normalize_email(column_name):
 
 # Nettoyage des dates 
 def normalize_date (df,col_name):
-  df= df.withColumn(col_name, F.try_to_date(col(col_name), "yyyy-MM-dd"))    # j'ai mis try_to_date au lieu de to_date
+  # try_to_date n'existe pas en PySpark 3.5 (runner GitHub Actions) : on passe par
+  # la fonction SQL try_to_timestamp (pattern éprouvé du module suppression-incoherences),
+  # castée en date. Null si invalide, sans lever d'erreur.
+  df = df.withColumn(col_name, F.expr(f"cast(try_to_timestamp(cast(`{col_name}` as string), 'yyyy-MM-dd') as date)"))
   return df 
 
 # Nettoyage des numéros de Téléphone
@@ -99,10 +102,7 @@ def data_cleaning(df1, df2):
   # Coalesce : accepte date+heure OU date seule.
   # df1= df1.withColumn("AB_DATE_CREATION", F.try_to_timestamp(col("AB_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
  df1= df1.withColumn("AB_DATE_CREATION",
-   F.coalesce(
-       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
-       F.try_to_timestamp(col("AB_DATE_CREATION"), F.lit("yyyy-MM-dd"))
-     ))
+   F.expr("coalesce(try_to_timestamp(`AB_DATE_CREATION`, 'yyyy-MM-dd HH:mm:ss'), try_to_timestamp(`AB_DATE_CREATION`, 'yyyy-MM-dd'))"))
  
 
 #appliquée à SQL Server
@@ -110,10 +110,7 @@ def data_cleaning(df1, df2):
  # Même correction que AB_DATE_CREATION : dates seules dans le CSV AP.
   #df2= df2.withColumn("AP_DATE_CREATION", F.try_to_timestamp(col("AP_DATE_CREATION"), "yyyy-MM-dd HH:mm:ss"))
  df2= df2.withColumn("AP_DATE_CREATION",
-   F.coalesce(
-       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd HH:mm:ss")),
-       F.try_to_timestamp(col("AP_DATE_CREATION"), F.lit("yyyy-MM-dd"))
-     ))
+   F.expr("coalesce(try_to_timestamp(`AP_DATE_CREATION`, 'yyyy-MM-dd HH:mm:ss'), try_to_timestamp(`AP_DATE_CREATION`, 'yyyy-MM-dd'))"))
 
 
 # Appliquer la fonction aux colonnes de téléphone
