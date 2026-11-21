@@ -1,5 +1,4 @@
 
-A finir ce n'est pas le texte définitif!
 # MCD cible proposé
 
 Entités :
