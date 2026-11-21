@@ -1,4 +1,4 @@
-A finir ce n'est pas le texte définitif!
+
 # Stratégie Git
 
 ## Branches permanentes
@@ -17,18 +17,12 @@ A finir ce n'est pas le texte définitif!
 main
   |
 develop
-- Feature/US-01 — Importer les données AbAssurance 
-- Feature/US-02 — Importer les données AssurePlus 
-- Feature/US-03 — Normaliser les données clients 
-- Feature/US-04 — Identifier les doublons 
-- Feature/US-05 — Construire le modèle final 
-- Feature /US-06 — Répartition clients 
-- Feature/US-07 — Statistiques contrats 
-- Feature/US-08 — Statistiques sinistres 
-- Feature/US-09 — Statistiques financières 
-- Feature/US-10 — Matrice de doublons 
-- Feature/US-11 — Gestion des accès (RBAC) 
-- Feature/US-12 — Hachage des données sensibles 
+- feature/us-01/importer-les-donnees-abassurance 
+- feature/us-02/importer-les-donnees-assureplus  
+- feature/us-03/normaliser-les-donnees-clients
+- feature/us-04/identifier-les-doublons-clients
+....  
+ 
 
 ```
 

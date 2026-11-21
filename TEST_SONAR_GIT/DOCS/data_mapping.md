@@ -1,4 +1,4 @@
-A finir ce n'est pas le texte définitif!
+
 # Data mapping
 
 ## CLIENT
@@ -20,7 +20,7 @@ A finir ce n'est pas le texte définitif!
 | AP | Colonne source | Cible | Transformation |
 |---|---|---|---|
 | AP | AP_USER_ID | source_client_id | cast entier/string |
-| AP | AP_FULL_NAME | nom/nom_complet | normalisation ; split à documenter |
+| AP | AP_FULL_NAME | nom, prénom  | normalisation ; scinder le full-name |
 | AP | AP_BIRTH_DATE | date_naissance | to_date yyyy-MM-dd |
 | AP | AP_MAIL_ADDRESS | email | trim + lower |
 | AP | AP_PHONE_NUMBER | telephone | normalisation |
@@ -87,3 +87,6 @@ AP :
 - AP_AMOUNT_PAID -> montant
 - AP_PAYMENT_CHANNEL -> mode_paiement
 - AP_TRANSACTION_STATUS -> statut_transaction
+
+
+![Architecture du projet](./Modèle MCD.jpg)

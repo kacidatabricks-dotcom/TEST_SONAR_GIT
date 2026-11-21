@@ -1,4 +1,4 @@
-A finir ce n'est pas le texte définitif!
+
 # Data Quality
 
 ## Règles proposées
@@ -39,6 +39,10 @@ Les lignes invalides peuvent être :
 
 Ne jamais supprimer silencieusement une donnée source.
 
+je les garde dans des tables pour une anlyse ultérieure.
+
+
 
 ## Matching client
-Score proposé : email 50, téléphone 30, nom 10, date de naissance 20, soit 110 maximum.
+Utilisation d'une match key qui concatène le nom, le prénom et la date de naissance. La probabilité de detecter les vrais positifs est très forte.
+Le système de score peut être appliquée dans une autre version.

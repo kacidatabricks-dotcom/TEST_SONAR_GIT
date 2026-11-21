@@ -1,4 +1,4 @@
-A finir
+
 # Stratégie de tests
 
 ## Tests unitaires
