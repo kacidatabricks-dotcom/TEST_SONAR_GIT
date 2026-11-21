@@ -13,6 +13,22 @@ import importlib
 _protection_module = importlib.import_module("sonar-fonc-protection-contrats-sinistres-payments")
 from pyspark.sql import functions as F
 
+# Sur un runner GitHub Actions, dbutils n'existe pas (outil Databricks uniquement).
+# On fournit alors un stub dont le secret est une constante : le hachage reste
+# vérifiable hors Databricks, et le vrai dbutils est utilisé s'il est présent.
+try:
+    dbutils  # présent uniquement dans un notebook Databricks
+except NameError:
+    class _SecretsStub:
+        @staticmethod
+        def get(scope, key):
+            return "SEL_TEST_LOCAL_CI"
+
+    class _DBUtilsStub:
+        secrets = _SecretsStub()
+
+    dbutils = _DBUtilsStub()
+
 
 def _activer_module_protection():
     """Injecte F et dbutils dans le namespace du module pour le rendre appelable."""

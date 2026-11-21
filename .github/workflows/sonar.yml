@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - Develop
       - Test_push_databricks
   pull_request:
