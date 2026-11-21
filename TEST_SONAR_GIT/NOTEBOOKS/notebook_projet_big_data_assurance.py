@@ -870,7 +870,7 @@ enregistrement_silver(df_ap_sinistres_Rejected,"workspace.silver.sqlserver_sinis
 
 # COMMAND ----------
 
-# DBTITLE 1,UNIFICATION_MAPPING ET ENREGISTREMENT GOLD
+# DBTITLE 1,MAPPING_UNIFICATION_ET_ENREGISTREMENT GOLD
 #===================== COUCHE GOLD ============================#
 
 
