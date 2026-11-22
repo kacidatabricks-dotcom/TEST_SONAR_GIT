@@ -36,7 +36,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 from pyspark.sql import functions as F
 
 
-# Importer des fichiers des dossiers SRC et TESTS
+# Importer des fichiers des dossiers PIPELINE et TESTS
 
 
 import sys
@@ -45,22 +45,22 @@ import os
 #   Récupérer le chemin absolu du dossier courant (NOTEBOOK)
 current_dir = os.getcwd()
 
-#  Remonter d'un niveau (dossier parent) avant d'aller dans SRC
-src_path = os.path.abspath(os.path.join(current_dir, "..", "SRC"))
-
+#  Remonter d'un niveau (dossier parent) avant d'aller dans PIPELINE
+#PIPELINE_path = os.path.abspath(os.path.join(current_dir, "..", "PIPELINE"))
+PIPELINE_path = current_dir
 
 #  L'ajouter au chemin système
-if src_path not in sys.path:
-    sys.path.append(src_path)
+if PIPELINE_path not in sys.path:
+    sys.path.append(PIPELINE_path)
 
-print("----SRC path -------------")
-print(src_path)
+print("----PIPELINE path -------------")
+print(PIPELINE_path)
 
 #==================================
 # Importations des Données oracle
 #==================================
 
-# Importer à partir du dossier SRC
+# Importer à partir du dossier PIPELINE
 
 import importlib
 create_ab_dataframes = importlib.import_module("sonar-fonc-ingestion-des-donnees-oracle").create_ab_dataframes
@@ -199,13 +199,13 @@ enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistr
 
 
 
-# Ajout du dossier SRC au sys.path pour pouvoir importer les modules du projet
+# Ajout du dossier PIPELINE au sys.path pour pouvoir importer les modules du projet
 import sys
 import os
 
-src_path = os.path.abspath(os.path.join(os.getcwd(), "..", "SRC"))
-if src_path not in sys.path:
-    sys.path.append(src_path)
+PIPELINE_path = os.path.abspath(os.path.join(os.getcwd(), "..", "PIPELINE"))
+if PIPELINE_path not in sys.path:
+    sys.path.append(PIPELINE_path)
 
 #*****************************************************************************
 # SUPPRESSION LIGNES INCOHERENTES : les lignes qui présentent des incohérences
@@ -992,13 +992,13 @@ import sys
 import os
 from coverage import Coverage
 
-# Définir le chemin absolu du dossier SRC
-src_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/SRC"
+# Définir le chemin absolu du dossier PIPELINE
+PIPELINE_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/PIPELINE"
 
 test_path = "/Workspace/Users/kacidatabricks@gmail.com/TEST_SONAR_GIT/TEST_SONAR_GIT/TESTS"
 
-if src_path not in sys.path:
-    sys.path.append(src_path)
+if PIPELINE_path not in sys.path:
+    sys.path.append(PIPELINE_path)
 
 if test_path not in sys.path:
    sys.path.append(test_path)
@@ -1006,12 +1006,12 @@ if test_path not in sys.path:
 # Dossier des CSV AbAssurance — même valeur que le défaut des modules d'ingestion
 # (<racine du dépôt>/DATA/SAMPLE/ABASSURANCE). Les fonctions de test appellent
 # create_ab_dataframes(spark, data_dir) avec ce nom, il doit exister dans le namespace.
-data_dir = os.path.join(os.path.dirname(src_path), "DATA", "SAMPLE", "ABASSURANCE")
+data_dir = os.path.join(os.path.dirname(PIPELINE_path),"DOCS", "DATA", "SAMPLE", "ABASSURANCE")
 
 
 
 # On initialise et on démarre TOUT DE SUITE le coverage, avant tout import !
-cov = Coverage(source=[src_path])
+cov = Coverage(source=[PIPELINE_path])
 cov.start()
 
 # ==========================================
@@ -1021,9 +1021,9 @@ cov.start()
 import pkgutil
 import importlib
 
-print("Importation des modules (SRC) sous surveillance de coverage...")
-for module_info in pkgutil.iter_modules([src_path]):
-    # Les modules SRC portent des noms avec tirets ("sonar-fonc-...") : ce ne sont pas
+print("Importation des modules (PIPELINE) sous surveillance de coverage...")
+for module_info in pkgutil.iter_modules([PIPELINE_path]):
+    # Les modules PIPELINE portent des noms avec tirets ("sonar-fonc-...") : ce ne sont pas
     # des identifiants Python valides pour "import x", MAIS importlib.import_module
     # les accepte. On ne saute que les fichiers non modules (ex. "__init__.py.py").
     if "." in module_info.name or module_info.name.startswith("_"):
@@ -1034,14 +1034,14 @@ for module_info in pkgutil.iter_modules([src_path]):
         module = importlib.import_module(module_info.name)
         module = importlib.reload(module)
     except Exception as e:
-        print(f"ATTENTION : import SRC impossible pour {module_info.name} : {e}")
+        print(f"ATTENTION : import PIPELINE impossible pour {module_info.name} : {e}")
         continue
 
     # Injecte les fonctions dans l'espace global pour que les  tests unittest les trouvent
     module_attrs = [attr for attr in dir(module) if not attr.startswith('_')]
     for attr in module_attrs:
         globals()[attr] = getattr(module, attr)
-# Pour les tests : les fichiers de TESTS sont chargés via exec() (la couverture ne porte que sur SRC).
+# Pour les tests : les fichiers de TESTS sont chargés via exec() (la couverture ne porte que sur PIPELINE).
 # exec() fait partager le namespace du notebook, ce qui est indispensable ici car les fonctions
 # de test s'appellent entre elles et utilisent les DataFrames créés par les fichiers d'ingestion.
 import glob
@@ -1058,7 +1058,7 @@ for f in ingestion_files + other_files:
     except Exception as e:
         print(f"ATTENTION : erreur au chargement de {os.path.basename(f)} : {e}")
 
-# Plusieurs tests utilisent df_ab_* : on les crée via la fonction SRC
+# Plusieurs tests utilisent df_ab_* : on les crée via la fonction PIPELINE
 # (dans le fichier TESTS d'ingestion Oracle, la création au niveau module est dans un docstring = code mort)
 df_ab_clients, df_ab_contrats, df_ab_sinistres, df_ab_payments = create_ab_dataframes(spark)
 # Idem pour les DataFrames AssurePlus (df_ap_*), utilisés notamment par harmonize_clients

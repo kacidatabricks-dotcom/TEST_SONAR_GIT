@@ -45,6 +45,7 @@ def load_ap_data(spark,data_dir=None):
     if data_dir is None:
         data_dir = (
             Path(__file__).resolve().parents[1]
+            /"DOCS"
             / "DATA"
             / "SAMPLE"
             / "APASSURANCE"
