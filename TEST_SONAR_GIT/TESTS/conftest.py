@@ -5,12 +5,12 @@ import pytest
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 
-# Chemin vers le dossier SRC
+# Chemin vers le dossier PIPELINE (modules sonar-fonc-*.py)
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SRC_PATH = PROJECT_ROOT / "SRC"
+PIPELINE_PATH = PROJECT_ROOT / "PIPELINE"
 
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+if str(PIPELINE_PATH) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_PATH))
 
 
 @pytest.fixture(scope="session")

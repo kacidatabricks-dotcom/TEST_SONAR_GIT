@@ -3,4 +3,7 @@
 relative_files = True
 source =
     TEST_SONAR_GIT/PIPELINE
+omit =
+    */notebook_projet_big_data_assurance.py
+    */TEST_PAth.py
 
