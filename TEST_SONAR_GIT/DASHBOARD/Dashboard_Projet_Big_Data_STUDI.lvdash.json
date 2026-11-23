@@ -15,7 +15,7 @@
         "SELECT CODE_POSTAL, COUNT(DISTINCT MASTER_CLIENT_ID) AS nb_clients\n",
         "FROM workspace.gold.dim_clients_gold\n",
         "GROUP BY CODE_POSTAL;\n",
-        "\n",
+        "-- feature/us-07/statistiques-contrats\n",
         "-- 3. Statistiques contrats par type\n",
         "SELECT TYPE_CONTRAT, COUNT(CONTRAT_ID) AS nb_contrats, SUM(MONTANT_PRIME) AS montant_total\n",
         "FROM workspace.gold.fact_contrats\n",
@@ -64,7 +64,7 @@
         "FROM workspace.gold.dim_clients_gold\n",
         "GROUP BY CODE_POSTAL;\n",
         "-- 2. Statistiques Contrats (Graphique en Barres)\n",
-        "\n",
+        "-- feature/us-07/statistiques-contrats\n",
         "SELECT TYPE_CONTRAT, COUNT(CONTRAT_ID) as nb_contrats, SUM(montant_prime) as total_primes\n",
         "FROM workspace.gold.fact_contrats\n",
         "GROUP BY TYPE_CONTRAT;\n",
@@ -132,6 +132,7 @@
       "name": "c65a94a6",
       "displayName": "Contract Type Analysis Summary",
       "queryLines": [
+        "-- feature/us-07/statistiques-contrats\r\n",
         "-- 3. Statistiques contrats par type\r\n",
         "SELECT TYPE_CONTRAT, COUNT(CONTRAT_ID) AS nb_contrats, SUM(MONTANT_PRIME) AS montant_total\r\n",
         "FROM workspace.gold.fact_contrats\r\n",
@@ -261,6 +262,7 @@
       "name": "contrats_detail",
       "displayName": "Détail des Contrats",
       "queryLines": [
+        "-- feature/us-07/statistiques-contrats\n",
         "SELECT\n",
         "  CASE \n",
         "    WHEN c.CONTRAT_ID IS NOT NULL THEN '****' \n",
