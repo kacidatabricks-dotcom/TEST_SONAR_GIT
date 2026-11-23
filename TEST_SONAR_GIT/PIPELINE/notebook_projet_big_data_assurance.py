@@ -879,6 +879,9 @@ enregistrement_silver(df_ap_sinistres_Rejected,"workspace.silver.sqlserver_sinis
 import importlib
 _mod = importlib.import_module("sonar-fonc-harmonisation-et-unification-clients")
 harmonize_clients = _mod.harmonize_clients
+#=========================================
+# feature/us-05/construire-le-modele-final
+#=========================================
 
 # Mapping et unification des clients
 dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
