@@ -21,6 +21,7 @@
         "FROM workspace.gold.fact_contrats\n",
         "GROUP BY TYPE_CONTRAT;\n",
         "\n",
+        "--feature/us-09/statistiques-financieres\n",
         "-- 4. Statistiques sinistres & financières\n",
         "SELECT \n",
         "    SUM(c.MONTANT_PRIME) AS chiffre_affaires,\n",
@@ -290,6 +291,7 @@
       "name": "payments_detail",
       "displayName": "Détail des Paiements",
       "queryLines": [
+        "-- feature/us-09/statistiques-financieres\n",
         "SELECT\n",
         "  CASE\n",
         "    WHEN p.PAYMENT_ID IS NOT NULL THEN '****'\n",
