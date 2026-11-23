@@ -941,14 +941,30 @@ dim_clients_gold.write.format("delta").mode("overwrite").option("overwriteSchema
 
 _mod = importlib.import_module("sonar-fonc-unification-et-gold-contrat")
 unify_and_map_contrats = _mod.unify_and_map_contrats
-
+#======================================
 # Unification Contrats
-
+#=====================================
 fact_contrats_gold = unify_and_map_contrats(df_ab_contrats, df_ap_contrats, dim_clients_gold)
 
+# feature/us-12/hachage-des-donnees-sensibles 
+#===============================================================================================
+#======= Masquage des données contrats  avant affichage dans les Dashboard
+#===============================================================================================
+
+from pyspark.sql import functions as F
+
+# Remplacer par des astérisques
+# Pour les contrats
+
+fact_contrats_gold_Masqued = fact_contrats_gold.withColumn("MASTER_CLIENT_ID_Masqued", F.lit("****")) \
+              .withColumn("CONTRAT_ID_Masqued", F.lit("****")).drop("CONTRAT_ID").drop("MASTER_CLIENT_ID")
+print("test du masquage")
+fact_contrats_gold.show(5, truncate = False)
 
 # Enregistrement en Gold
 fact_contrats_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_contrats")
+
+fact_contrats_gold_Masqued.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_contrats_Masqued")
 
 print(" 5 Contrats finaux")
 print(fact_contrats_gold.show(5,truncate= False))
@@ -960,7 +976,21 @@ unify_and_map_sinistres = _mod.unify_and_map_sinistres
 
 fact_sinistres_gold = unify_and_map_sinistres(df_ab_sinistres, df_ap_sinistres, fact_contrats_gold) 
 
+# feature/us-12/hachage-des-donnees-sensibles 
+#===============================================================================================
+#======= Masquage des données sinistres avant affichage dans les Dashboard
+#===============================================================================================
+
+# Pour les sinistres
+fact_sinistres_gold_Masqued  = fact_sinistres_gold.withColumn("MASTER_CLIENT_ID_Masqued", F.lit("****")) \
+              .withColumn("SINISTRE_ID_Masqued", F.lit("****"))\
+              .withColumn("CONTRAT_ID_Masqued", F.lit("****")).drop("MASTER_CLIENT_ID","CONTRAT_ID","SINISTRE_ID") 
+
+#Enregistrement en Gold
 fact_sinistres_gold.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_sinistres")
+
+fact_sinistres_gold_Masqued.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_sinistres_Masqued")
+
 print(" 5 sinistres finaux")
 print(fact_sinistres_gold.show(5,truncate= False))
 
@@ -971,12 +1001,30 @@ unify_and_map_payments = _mod.unify_and_map_payments
 
 fact_payments_gold_mapped = unify_and_map_payments(df_ab_payments, df_ap_payments, fact_contrats_gold)
 
+# feature/us-12/hachage-des-donnees-sensibles 
+#===============================================================================================
+#======= Masquage des données payments avant affichage dans les Dashboard
+#===============================================================================================
+
+fact_payments_gold_mapped_Masqued  = fact_payments_gold_mapped.withColumn("MASTER_CLIENT_ID_Masqued", F.lit("****")) \
+              .withColumn("SINISTRE_ID_Masqued", F.lit("****"))\
+              .withColumn("CONTRAT_ID_Masqued", F.lit("****")).drop("MASTER_CLIENT_ID","CONTRAT_ID","PAYMENT_ID") 
+
 fact_payments_gold_mapped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_payments")  
+
+fact_payments_gold_mapped_Masqued.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("workspace.gold.fact_payments_Masqued") 
 
 print(" 5 Payments finaux")
 print(fact_payments_gold_mapped.show(5,truncate= False))
 
 # 
+
+
+
+
+
+
+
 
 
 # COMMAND ----------
