@@ -1018,6 +1018,12 @@ print(" 5 Payments finaux")
 print(fact_payments_gold_mapped.show(5,truncate= False))
 
 # feature/us-06/repartition-clients
+# Directement dans le datset du Dashboard
+
+# feature/us-07/statistiques-contrats
+# Voir les dataset dans le Dashboard
+
+
 # Voir directement dans le Dashboard
 
 
