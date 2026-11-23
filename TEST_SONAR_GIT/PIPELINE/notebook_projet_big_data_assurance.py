@@ -1026,6 +1026,14 @@ print(fact_payments_gold_mapped.show(5,truncate= False))
 
 # Voir directement dans le Dashboard
 
+# feature/us-07/statistiques-contrats
+# Voir directement dans le Dashboard
+
+
+#feature/us-08/statistiques-sinistres
+# Voir directement dans le Dashboard
+
+
 
 
 
