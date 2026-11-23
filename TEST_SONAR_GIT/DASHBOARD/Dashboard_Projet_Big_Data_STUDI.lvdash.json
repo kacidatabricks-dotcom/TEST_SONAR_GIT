@@ -210,10 +210,16 @@
       "displayName": "Détail des Sinistres",
       "queryLines": [
         "SELECT\n",
-        "  s.SINISTRE_ID,\n",
-        "  s.CONTRAT_ID,\n",
+        "  CASE\n",
+        "    WHEN s.SINISTRE_ID IS NOT NULL THEN '****'\n",
+        "  END AS SINISTRE_ID,\n",
+        "  CASE\n",
+        "    WHEN s.CONTRAT_ID IS NOT NULL THEN '****'\n",
+        "  END AS CONTRAT_ID,\n",
         "  c.TYPE_CONTRAT,\n",
-        "  c.MASTER_CLIENT_ID,\n",
+        "  CASE\n",
+        "    WHEN s.MASTER_CLIENT_ID IS NOT NULL THEN '****'\n",
+        "  END AS MASTER_CLIENT_ID,\n",
         "  cl.Nom_Hached,\n",
         "  cl.Prenom_Hached,\n",
         "  s.MONTANT_INDEMNISE,\n",
@@ -224,6 +230,8 @@
         "      ON s.CONTRAT_ID = c.CONTRAT_ID\n",
         "    LEFT JOIN workspace.gold.dim_clients_gold cl\n",
         "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID\n",
+        "WHERE\n",
+        "  c.CONTRAT_ID IS NOT NULL\n",
         "ORDER BY\n",
         "  s.MONTANT_INDEMNISE DESC"
       ]
@@ -254,8 +262,14 @@
       "displayName": "Détail des Contrats",
       "queryLines": [
         "SELECT\n",
-        "  c.CONTRAT_ID,\n",
-        "  c.MASTER_CLIENT_ID,\n",
+        "  CASE \n",
+        "    WHEN c.CONTRAT_ID IS NOT NULL THEN '****' \n",
+        "    ELSE NULL \n",
+        "  END AS CONTRAT_ID,\n",
+        "  CASE \n",
+        "    WHEN c.MASTER_CLIENT_ID IS NOT NULL THEN '****' \n",
+        "    ELSE NULL \n",
+        "  END AS MASTER_CLIENT_ID,\n",
         "  c.TYPE_CONTRAT,\n",
         "  cl.Nom_Hached,\n",
         "  cl.Prenom_Hached,\n",
@@ -265,9 +279,9 @@
         "FROM\n",
         "  workspace.gold.fact_contrats c\n",
         "    LEFT JOIN workspace.gold.dim_clients_gold cl\n",
-        "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID\n",
+        "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID -- Utilise toujours les vraies valeurs\n",
         "ORDER BY\n",
-        "  c.MONTANT_PRIME DESC"
+        "  c.MONTANT_PRIME DESC\n"
       ]
     },
     {
@@ -275,8 +289,12 @@
       "displayName": "Détail des Paiements",
       "queryLines": [
         "SELECT\n",
-        "  p.PAYMENT_ID,\n",
-        "  p.CONTRAT_ID,\n",
+        "  CASE\n",
+        "    WHEN p.PAYMENT_ID IS NOT NULL THEN '****'\n",
+        "  END AS PAYMENT_ID,\n",
+        "  CASE\n",
+        "    WHEN p.CONTRAT_ID IS NOT NULL THEN '****'\n",
+        "  END AS CONTRAT_ID,\n",
         "  c.TYPE_CONTRAT,\n",
         "  cl.Nom_Hached,\n",
         "  cl.Prenom_Hached,\n",
@@ -291,8 +309,9 @@
         "      ON p.CONTRAT_ID = c.CONTRAT_ID\n",
         "    LEFT JOIN workspace.gold.dim_clients_gold cl\n",
         "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID\n",
-        "ORDER BY\n",
-        "  p.MONTANT_INDEMNISE DESC"
+        "WHERE\n",
+        "  c.CONTRAT_ID IS NOT NULL\n",
+        "  AND cl.MASTER_CLIENT_ID IS NOT NULL"
       ]
     },
     {
@@ -364,6 +383,35 @@
         "FROM clients_comptes\r\n",
         "WHERE nb_comptes > 1\r\n",
         "ORDER BY MASTER_CLIENT_ID, SOURCE_SYSTEM LIMIT 15;"
+      ]
+    },
+    {
+      "name": "sinistres_stats_v2",
+      "displayName": "Détail des Sinistres (v2)",
+      "queryLines": [
+        "SELECT\n",
+        "  CASE\n",
+        "    WHEN s.SINISTRE_ID IS NOT NULL THEN '****'\n",
+        "  END AS SINISTRE_ID,\n",
+        "  CASE\n",
+        "    WHEN s.CONTRAT_ID IS NOT NULL THEN '****'\n",
+        "  END AS CONTRAT_ID,\n",
+        "  c.TYPE_CONTRAT,\n",
+        "  CASE\n",
+        "    WHEN s.MASTER_CLIENT_ID IS NOT NULL THEN '****'\n",
+        "  END AS MASTER_CLIENT_ID,\n",
+        "  cl.Nom_Hached,\n",
+        "  cl.Prenom_Hached,\n",
+        "  s.MONTANT_INDEMNISE,\n",
+        "  s.STATUT_SINISTRE\n",
+        "FROM\n",
+        "  workspace.gold.fact_sinistres s\n",
+        "    LEFT JOIN workspace.gold.fact_contrats c\n",
+        "      ON s.CONTRAT_ID = c.CONTRAT_ID\n",
+        "    LEFT JOIN workspace.gold.dim_clients_gold cl\n",
+        "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID\n",
+        "WHERE\n",
+        "  c.CONTRAT_ID IS NOT NULL"
       ]
     }
   ],
@@ -1804,55 +1852,12 @@
       "layout": [
         {
           "widget": {
-            "name": "total_sinistres",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "sinistres_detail",
-                  "fields": [
-                    {
-                      "name": "count(SINISTRE_ID)",
-                      "expression": "COUNT(`SINISTRE_ID`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "frame": {
-                "showTitle": true,
-                "title": "Total Sinistres"
-              },
-              "version": 2,
-              "widgetType": "counter",
-              "encodings": {
-                "value": {
-                  "fieldName": "count(SINISTRE_ID)",
-                  "rowNumber": 0
-                }
-              },
-              "data": {
-                "queryName": "main_query"
-              }
-            }
-          },
-          "position": {
-            "x": 0,
-            "y": 0,
-            "width": 6,
-            "height": 3
-          }
-        },
-        {
-          "widget": {
             "name": "montant_total_indemnise",
             "queries": [
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "sinistres_detail",
+                  "datasetName": "sinistres_stats_v2",
                   "fields": [
                     {
                       "name": "sum(MONTANT_INDEMNISE)",
@@ -1866,7 +1871,10 @@
             "spec": {
               "frame": {
                 "showTitle": true,
-                "title": "Montant Total Indemnisé"
+                "title": {
+                  "value": "Montant Total Indemnisé",
+                  "fields": []
+                }
               },
               "version": 2,
               "widgetType": "counter",
@@ -1895,7 +1903,7 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "sinistres_detail",
+                  "datasetName": "sinistres_stats_v2",
                   "fields": [
                     {
                       "name": "STATUT_SINISTRE",
@@ -1913,28 +1921,28 @@
             "spec": {
               "frame": {
                 "showTitle": true,
-                "title": "Sinistres par Statut"
+                "title": {
+                  "value": "Sinistres par Statut",
+                  "fields": []
+                }
               },
               "version": 3,
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "STATUT_SINISTRE",
-                  "displayName": "STATUT_SINISTRE",
                   "scale": {
                     "type": "categorical"
                   }
                 },
                 "y": {
                   "fieldName": "sum(MONTANT_INDEMNISE)",
-                  "displayName": "MONTANT_INDEMNISE",
                   "scale": {
                     "type": "quantitative"
                   }
                 },
                 "color": {
                   "fieldName": "STATUT_SINISTRE",
-                  "displayName": "STATUT_SINISTRE",
                   "scale": {
                     "type": "categorical"
                   }
@@ -1959,7 +1967,7 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "sinistres_detail",
+                  "datasetName": "sinistres_stats_v2",
                   "fields": [
                     {
                       "name": "TYPE_CONTRAT",
@@ -1977,28 +1985,28 @@
             "spec": {
               "frame": {
                 "showTitle": true,
-                "title": "Sinistres par Type de Contrat"
+                "title": {
+                  "value": "Sinistres par Type de Contrat",
+                  "fields": []
+                }
               },
               "version": 3,
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "TYPE_CONTRAT",
-                  "displayName": "TYPE_CONTRAT",
                   "scale": {
                     "type": "categorical"
                   }
                 },
                 "y": {
                   "fieldName": "sum(MONTANT_INDEMNISE)",
-                  "displayName": "MONTANT_INDEMNISE",
                   "scale": {
                     "type": "quantitative"
                   }
                 },
                 "color": {
                   "fieldName": "TYPE_CONTRAT",
-                  "displayName": "TYPE_CONTRAT",
                   "scale": {
                     "type": "categorical"
                   }
@@ -2023,7 +2031,7 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "sinistres_detail",
+                  "datasetName": "sinistres_stats_v2",
                   "fields": [
                     {
                       "name": "SINISTRE_ID",
@@ -2036,6 +2044,10 @@
                     {
                       "name": "TYPE_CONTRAT",
                       "expression": "`TYPE_CONTRAT`"
+                    },
+                    {
+                      "name": "MASTER_CLIENT_ID",
+                      "expression": "`MASTER_CLIENT_ID`"
                     },
                     {
                       "name": "Nom_Hached",
@@ -2080,6 +2092,9 @@
                     "fieldName": "TYPE_CONTRAT"
                   },
                   {
+                    "fieldName": "MASTER_CLIENT_ID"
+                  },
+                  {
                     "fieldName": "Nom_Hached"
                   },
                   {
@@ -2103,6 +2118,49 @@
             "y": 9,
             "width": 12,
             "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total_sinistres_new",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sinistres_stats_v2",
+                  "fields": [
+                    {
+                      "name": "count(SINISTRE_ID)",
+                      "expression": "COUNT(`SINISTRE_ID`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Sinistres"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(SINISTRE_ID)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 3
           }
         }
       ],
@@ -2369,14 +2427,23 @@
                       "expression": "`MODE_PAYMENT`"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`Nom_Hached`"
+                    }
+                  ]
                 }
               }
             ],
             "spec": {
               "frame": {
                 "showTitle": true,
-                "title": "Détail des Paiements"
+                "title": {
+                  "value": "Détail des Paiements",
+                  "fields": []
+                }
               },
               "version": 2,
               "widgetType": "table",
@@ -2405,6 +2472,14 @@
                   },
                   {
                     "fieldName": "MODE_PAYMENT"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 3
+                    }
                   }
                 ]
               },
