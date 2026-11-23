@@ -38,6 +38,7 @@
         "GROUP BY MASTER_CLIENT_ID, Nom_Hached, Prenom_Hached\n",
         "HAVING COUNT(*) > 1;\n",
         "*/\n",
+        "-- feature/us-10/matrice-de-doublons\n",
         "WITH clients_comptes AS (\n",
         "    SELECT \n",
         "        MASTER_CLIENT_ID, \n",
@@ -163,7 +164,7 @@
       "name": "c2f22336",
       "displayName": "Duplicate Client Accounts Summary",
       "queryLines": [
-        "\r\n",
+        "-- feature/us-10/matrice-de-doublons\r\n",
         "-- 5. Matrice des doublons\r\n",
         "WITH clients_comptes AS (\r\n",
         "    SELECT \r\n",
