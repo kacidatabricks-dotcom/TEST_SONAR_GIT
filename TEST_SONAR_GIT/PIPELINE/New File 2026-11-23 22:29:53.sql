@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM workspace.gold.fact_sinistres;
