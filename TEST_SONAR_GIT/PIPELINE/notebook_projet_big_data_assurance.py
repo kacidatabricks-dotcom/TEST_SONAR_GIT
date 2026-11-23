@@ -887,7 +887,8 @@ harmonize_clients = _mod.harmonize_clients
 dim_clients = harmonize_clients(df_ab_clients,df_ap_clients)
 print("dim_clients les 5 premiers clients  finaux")
 print(dim_clients.show(5))
-
+ 
+#feature/us-04/identifier-les-doublons
 
 #  Matrice de Doublons et Création de la Dimension Client
 
