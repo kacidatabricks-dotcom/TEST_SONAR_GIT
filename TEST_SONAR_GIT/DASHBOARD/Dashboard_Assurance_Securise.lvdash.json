@@ -161,7 +161,7 @@
       "name": "c2f22336",
       "displayName": "Duplicate Client Accounts Summary",
       "queryLines": [
-        "\r\n",
+        "-- feature/us-10/matrice-de-doublons\r\n",
         "-- 5. Matrice des doublons\r\n",
         "WITH clients_comptes AS (\r\n",
         "    SELECT \r\n",
@@ -339,6 +339,7 @@
       "name": "dc7a2c8b",
       "displayName": "Duplicate Client Accounts Overview Dataset",
       "queryLines": [
+        "-- feature/us-10/matrice-de-doublons\r\n",
         "-- Matrice des doublons\r\n",
         "WITH clients_comptes AS (\r\n",
         "    SELECT \r\n",

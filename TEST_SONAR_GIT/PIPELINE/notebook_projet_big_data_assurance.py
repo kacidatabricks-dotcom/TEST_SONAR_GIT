@@ -1035,7 +1035,11 @@ print(fact_payments_gold_mapped.show(5,truncate= False))
 
 
 #feature/us-08/statistiques-sinistres
-# Voir directement dans le Dashboard
+# Voir directement dans le Dashboard 
+
+
+#feature/us-10/matrice-de-doublons
+# Voir dans le dashboard
 
 
 
