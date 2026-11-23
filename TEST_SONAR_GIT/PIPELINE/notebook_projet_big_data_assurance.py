@@ -1024,6 +1024,7 @@ print(fact_payments_gold_mapped.show(5,truncate= False))
 # Voir les dataset dans le Dashboard
 
 
+# Voir directement dans le Dashboard
 
 
 
