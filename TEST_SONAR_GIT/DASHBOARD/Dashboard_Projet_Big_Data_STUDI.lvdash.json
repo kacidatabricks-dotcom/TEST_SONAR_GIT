@@ -20,6 +20,8 @@
         "SELECT TYPE_CONTRAT, COUNT(CONTRAT_ID) AS nb_contrats, SUM(MONTANT_PRIME) AS montant_total\n",
         "FROM workspace.gold.fact_contrats\n",
         "GROUP BY TYPE_CONTRAT;\n",
+        "\n",
+        "--feature/us-09/statistiques-financieres\n",
         "-- feature/us-08/statistiques-sinistres\n",
         "-- 4. Statistiques sinistres & financières\n",
         "SELECT \n",
@@ -291,6 +293,7 @@
       "name": "payments_detail",
       "displayName": "Détail des Paiements",
       "queryLines": [
+        "-- feature/us-09/statistiques-financieres\n",
         "SELECT\n",
         "  CASE\n",
         "    WHEN p.PAYMENT_ID IS NOT NULL THEN '****'\n",
