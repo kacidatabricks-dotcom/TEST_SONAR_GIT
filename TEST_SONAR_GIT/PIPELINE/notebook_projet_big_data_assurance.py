@@ -976,7 +976,10 @@ fact_payments_gold_mapped.write.format("delta").mode("overwrite").option("overwr
 print(" 5 Payments finaux")
 print(fact_payments_gold_mapped.show(5,truncate= False))
 
-# 
+# feature/us-06/repartition-clients
+# Voir directement dans le Dashboard
+
+
 
 
 # COMMAND ----------
