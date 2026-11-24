@@ -192,6 +192,81 @@ enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistr
 
 # COMMAND ----------
 
+# DBTITLE 1,Ingestion en flux simulé (Structured Streaming)
+# ============================================================
+# INGESTION EN FLUX SIMULÉ — Spark Structured Streaming
+# (module sonar-fonc-ingestion-flux)
+# Chaque CSV source est découpé en blocs-fichiers de 1000 lignes
+# (volume workspace.bronze.flux), puis chaque flux ingère UN bloc par
+# micro-batch (readStream + maxFilesPerTrigger=1 + trigger AvailableNow)
+# en écriture append vers les tables bronze *_flux, avec le même hachage
+# PII que le batch, la traçabilité (_micro_batch, _horodatage_ingestion)
+# et un checkpoint par flux (garantie exactly-once).
+# ============================================================
+
+import importlib
+
+flux = importlib.import_module("sonar-fonc-ingestion-flux")
+
+# Le sel de hachage est le même que celui du mode batch
+salt = dbutils.secrets.get(scope="PROJET_BIG_DATA_STUDI", key="hash_salt")
+
+# 1) Découpage des CSV en blocs de 1000 lignes + configuration des flux
+config_flux = flux.preparer_blocs_flux(taille_bloc=1000)
+
+# 2) Repartir de zéro (tables cibles tronquées + checkpoints purgés)
+flux.reinitialiser_flux(spark, config_flux)
+
+# 3) Démarrage des flux : un bloc ingéré par micro-batch
+requetes_flux = flux.demarrer_ingestion_flux(spark, config_flux, salt=salt)
+
+# 4) Suivi de la progression + vérification finale
+termine = flux.attendre_fin_flux(spark, requetes_flux, config_flux)
+
+# COMMAND ----------
+
+# DBTITLE 1,Progression du flux (graphique)
+# ============================================================
+# PROGRESSION DE L'INGESTION EN FLUX — graphique
+# Cumul des lignes ingérées par table au fil des micro-batches,
+# reconstitué depuis la colonne _horodatage_ingestion des tables
+# bronze *_flux (self-contained : scan du schéma bronze).
+# ============================================================
+
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+# Tables cibles du flux
+tables_flux = [
+    r["tableName"]
+    for r in spark.sql("SHOW TABLES IN workspace.bronze").collect()
+    if r["tableName"].endswith("_flux")
+]
+
+# Une ligne par table et horodatage de micro-batch : lignes ingérées
+# à cet instant puis cumul (fenêtre ordonnée par table)
+unions = None
+for table in tables_flux:
+    df_t = (
+        spark.table(f"workspace.bronze.{table}")
+        .groupBy("_horodatage_ingestion")
+        .agg(F.count(F.lit(1)).alias("lignes_ingerees"))
+        .withColumn("table", F.lit(table))
+        .select("table", "_horodatage_ingestion", "lignes_ingerees")
+    )
+    unions = df_t if unions is None else unions.unionByName(df_t)
+
+fenetre = Window.partitionBy("table").orderBy("_horodatage_ingestion")
+progression_flux = (
+    unions.withColumn("lignes_cumulees", F.sum("lignes_ingerees").over(fenetre))
+    .orderBy("table", "_horodatage_ingestion")
+)
+
+print(f"{len(tables_flux)} tables en flux, progression reconstituée :")
+display(progression_flux)
+
+# COMMAND ----------
+
 # DBTITLE 1,Cleaning et Enregistrement en Silver
 #========================================================
 #   COUCHE SILVER 
@@ -1270,6 +1345,26 @@ class TestETLPipeline(unittest.TestCase):
 
     def test1_unify_and_map_contrats_erreur(self):
         test_unify_and_map_contrats_erreur()
+
+    # Tests du module d'ingestion en flux simulé (sonar-fonc-ingestion-flux)
+    def test1_ingestion_flux_decoupage(self):
+        test_decouper_csv_en_blocs()
+        test_decouper_csv_purge_anciens_blocs()
+
+    def test1_ingestion_flux_trouver_csv(self):
+        test_trouver_csv_insensible_a_la_casse()
+
+    def test1_ingestion_flux_schema_texte(self):
+        test_schema_texte()
+
+    def test1_ingestion_flux_transformations_oracle(self):
+        test_appliquer_transformations_clients_oracle()
+
+    def test1_ingestion_flux_transformations_assureplus_clients(self):
+        test_appliquer_transformations_clients_assureplus()
+
+    def test1_ingestion_flux_transformations_assureplus_contrats(self):
+        test_appliquer_transformations_contrats_assureplus()
 
 
 
