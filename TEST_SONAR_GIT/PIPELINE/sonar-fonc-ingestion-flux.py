@@ -365,6 +365,15 @@ def attendre_fin_flux(spark, requetes, config, delai_max_secondes=600, pas_secon
     attendus = {infos["table"]: infos["attendu"] for infos in config.values()}
     debut = time.time()
 
+    def _nb_lignes(table):
+        """Effectif d'une table cible ; 0 tant que le premier micro-batch
+        n'a pas encore créé la table (lancement initial) : le polling ne
+        doit pas échouer pendant cette fenêtre transitoire."""
+        try:
+            return spark.table(table).count()
+        except Exception:
+            return 0
+
     # Attente active : les flux s'arrêtent d'eux-mêmes une fois épuisés
     while any(requete.isActive for requete in requetes.values()):
         if time.time() - debut > delai_max_secondes:
@@ -376,7 +385,7 @@ def attendre_fin_flux(spark, requetes, config, delai_max_secondes=600, pas_secon
         time.sleep(pas_secondes)
         progression = []
         for table, attendu in attendus.items():
-            nb = spark.table(table).count()
+            nb = _nb_lignes(table)
             progression.append(f"{table.split('.')[-1]}: {nb}/{attendu}")
         print(" | ".join(progression))
 
@@ -386,7 +395,7 @@ def attendre_fin_flux(spark, requetes, config, delai_max_secondes=600, pas_secon
     # Vérification finale
     conforme = True
     for table, attendu in attendus.items():
-        nb = spark.table(table).count()
+        nb = _nb_lignes(table)
         print(f"{table}: {nb}/{attendu}")
         if nb != attendu:
             conforme = False
