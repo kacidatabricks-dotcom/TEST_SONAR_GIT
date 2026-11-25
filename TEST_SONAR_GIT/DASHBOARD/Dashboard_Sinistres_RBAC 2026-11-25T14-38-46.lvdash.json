@@ -1,0 +1,313 @@
+{
+  "datasets": [
+    {
+      "name": "sinistres_rbac",
+      "displayName": "Sinistres RBAC",
+      "queryLines": [
+        "SELECT \n",
+        "  CASE\n",
+        "    WHEN\n",
+        "      is_account_group_member('Data Engineer')\n",
+        "      OR is_account_group_member('Directeur général')\n",
+        "      OR session_user() IN ('Data Engineer', 'Directeur général')\n",
+        "    THEN\n",
+        "         CAST(s.MASTER_CLIENT_ID AS STRING)\n",
+        "    ELSE '****'\n",
+        "  END AS SINISTRE_ID,\n",
+        "  CASE\n",
+        "    WHEN\n",
+        "      is_account_group_member('Data Engineer')\n",
+        "      OR is_account_group_member('Directeur général')\n",
+        "      OR session_user() IN ('Data Engineer', 'Directeur général')\n",
+        "    THEN\n",
+        "      s.CONTRAT_ID\n",
+        "    ELSE '****'\n",
+        "  END AS CONTRAT_ID,\n",
+        "  c.TYPE_CONTRAT,\n",
+        "  CASE\n",
+        "    WHEN\n",
+        "      is_account_group_member('Data Engineer')\n",
+        "      OR is_account_group_member('Directeur général')\n",
+        "      OR session_user() IN ('Data Engineer', 'Directeur général')\n",
+        "    THEN\n",
+        "      CAST(s.MASTER_CLIENT_ID AS STRING)\n",
+        "    ELSE '****'\n",
+        "  END AS MASTER_CLIENT_ID,\n",
+        "  cl.Nom_Hached AS Nom,\n",
+        "  cl.Prenom_Hached AS Prenom,\n",
+        "  s.MONTANT_INDEMNISE,\n",
+        "  s.STATUT_SINISTRE\n",
+        "FROM\n",
+        "  workspace.gold.fact_sinistres s\n",
+        "    LEFT JOIN workspace.gold.fact_contrats c\n",
+        "      ON s.CONTRAT_ID = c.CONTRAT_ID\n",
+        "    LEFT JOIN workspace.gold.dim_clients_gold cl\n",
+        "      ON c.MASTER_CLIENT_ID = cl.MASTER_CLIENT_ID\n",
+        "WHERE\n",
+        "  c.CONTRAT_ID IS NOT NULL"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "c072478f",
+      "displayName": "Page 1",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_sinistres",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sinistres_rbac",
+                  "fields": [
+                    {
+                      "name": "count(SINISTRE_ID)",
+                      "expression": "COUNT(`SINISTRE_ID`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Sinistres"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(SINISTRE_ID)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "montant_indemnise",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sinistres_rbac",
+                  "fields": [
+                    {
+                      "name": "sum(MONTANT_INDEMNISE)",
+                      "expression": "SUM(`MONTANT_INDEMNISE`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Montant Indemnisé"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(MONTANT_INDEMNISE)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "sinistres_par_statut",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sinistres_rbac",
+                  "fields": [
+                    {
+                      "name": "STATUT_SINISTRE",
+                      "expression": "`STATUT_SINISTRE`"
+                    },
+                    {
+                      "name": "sum(MONTANT_INDEMNISE)",
+                      "expression": "SUM(`MONTANT_INDEMNISE`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Sinistres par Statut"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "STATUT_SINISTRE",
+                  "displayName": "STATUT_SINISTRE",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(MONTANT_INDEMNISE)",
+                  "displayName": "MONTANT_INDEMNISE",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "STATUT_SINISTRE",
+                  "displayName": "STATUT_SINISTRE",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "detail_sinistres",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sinistres_rbac",
+                  "fields": [
+                    {
+                      "name": "SINISTRE_ID",
+                      "expression": "`SINISTRE_ID`"
+                    },
+                    {
+                      "name": "CONTRAT_ID",
+                      "expression": "`CONTRAT_ID`"
+                    },
+                    {
+                      "name": "TYPE_CONTRAT",
+                      "expression": "`TYPE_CONTRAT`"
+                    },
+                    {
+                      "name": "MASTER_CLIENT_ID",
+                      "expression": "`MASTER_CLIENT_ID`"
+                    },
+                    {
+                      "name": "Nom",
+                      "expression": "`Nom`"
+                    },
+                    {
+                      "name": "Prenom",
+                      "expression": "`Prenom`"
+                    },
+                    {
+                      "name": "MONTANT_INDEMNISE",
+                      "expression": "`MONTANT_INDEMNISE`"
+                    },
+                    {
+                      "name": "STATUT_SINISTRE",
+                      "expression": "`STATUT_SINISTRE`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Détail des Sinistres",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "SINISTRE_ID"
+                  },
+                  {
+                    "fieldName": "CONTRAT_ID"
+                  },
+                  {
+                    "fieldName": "TYPE_CONTRAT"
+                  },
+                  {
+                    "fieldName": "MASTER_CLIENT_ID"
+                  },
+                  {
+                    "fieldName": "Nom"
+                  },
+                  {
+                    "fieldName": "Prenom"
+                  },
+                  {
+                    "fieldName": "MONTANT_INDEMNISE"
+                  },
+                  {
+                    "fieldName": "STATUT_SINISTRE"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
