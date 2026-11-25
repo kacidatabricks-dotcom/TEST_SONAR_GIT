@@ -196,7 +196,7 @@ enregistrement_bronze(df_ap_sinistres_bronze,"workspace.bronze.sqlserver_sinistr
 # ============================================================
 # INGESTION EN FLUX SIMULÉ — Spark Structured Streaming
 # (module sonar-fonc-ingestion-flux)
-# Chaque CSV source est découpé en blocs-fichiers de 1000 lignes
+# Chaque CSV source est découpé en plusieurs blocs-fichiers de 1000 lignes
 # (volume workspace.bronze.flux), puis chaque flux ingère UN bloc par
 # micro-batch (readStream + maxFilesPerTrigger=1 + trigger AvailableNow)
 # en écriture append vers les tables bronze *_flux, avec le même hachage
